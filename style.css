@@ -186,7 +186,8 @@ body {
     border-radius: 0.5rem; /* rounded-lg */
     display: flex;
     align-items: center;
-    gap: 1.5rem; /* ENDRET: Fra 1rem (gap-4) til 1.5rem (gap-6) */
+    /* ENDRING: Økt avstand fra 1.5rem til 2.5rem for å gi mer plass */
+    gap: 2.5rem; 
 }
 
 .tag {
