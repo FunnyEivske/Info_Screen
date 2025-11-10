@@ -1,0 +1,121 @@
+/* --- Stilark for lunch.html --- */
+body, html {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #000;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden; /* Skjuler scrollbars */
+}
+
+/* Container for bakgrunnsvideo (Nå bilde) */
+#video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    transition: opacity 0.5s ease-in-out;
+    
+    background-image: url('https://images.unsplash.com/photo-1535591273668-5782c3618f4a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+/* Overlay for meldinger */
+#message-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* Skjult som standard */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    z-index: 10;
+    background-color: rgba(0, 0, 0, 0.6);
+    font-size: 5vw;
+    font-weight: 700;
+    text-shadow: 0 0 20px rgba(0,0,0,0.7);
+    padding: 20px;
+}
+
+/* Skjerm for "etter stengetid" */
+#after-hours {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none; /* Skjult som standard */
+    justify-content: center;
+    align-items: center;
+    background-color: #000; 
+    z-index: 20;
+    transition: opacity 0.5s ease-in-out;
+}
+
+#uia-logo {
+    width: 60%;
+    max-width: 400px;
+}
+
+/* --- Debug-knapper --- */
+#debug-controls {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap; 
+    gap: 10px; 
+    align-items: center;
+}
+
+/* Felles stil for knapper og dropdowns */
+#debug-controls button,
+#debug-controls select {
+    background-color: #f0f0f0;
+    color: #333;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 0.9em;
+}
+
+#debug-controls button:hover,
+#debug-controls select:hover {
+    background-color: #ddd;
+}
+
+/* Stil for "Simuler"-knappen */
+#simulate-btn {
+    background-color: #4CAF50; /* Grønn */
+    color: white;
+}
+#simulate-btn:hover {
+    background-color: #45a049;
+}
+
+/* Stil for debug-display */
+#debug-display {
+    background-color: #333;
+    color: #f0f0f0;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-family: monospace;
+    font-size: 0.9em;
+    text-align: center;
+}

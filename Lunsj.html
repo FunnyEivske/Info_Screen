@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunsj</title>
+    
+    <!-- 1. Import Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- 2. Link til den nye, separate CSS-filen -->
+    <link rel="stylesheet" href="lunch.style.css">
+</head>
+<body>
+
+    <!-- 1. Bakgrunnsbilde -->
+    <div id="video-background"></div>
+
+    <!-- 2. Meldings-overlay -->
+    <div id="message-overlay">
+        <span id="message-text"></span>
+    </div>
+
+    <!-- 3. "Etter stengetid"-skjerm -->
+    <div id="after-hours">
+        <!-- Bytter til hvit logo for svart bakgrunn -->
+        <img id="uia-logo" src="https://www.uia.no/om-uia/profil/logofiler/uia-logo-hvit-bokmal_svg.svg" alt="Universitetet i Agder Logo">
+    </div>
+
+    <!-- 4. Fullstendig nytt Debug-panel -->
+    <div id="debug-controls">
+        <div id="debug-display">Laster...</div>
+        
+        <!-- Dropdown for Dag -->
+        <select id="debug-day">
+            <option value="1">Mandag</option>
+            <option value="2">Tirsdag</option>
+            <option value="3">Onsdag</option>
+            <option value="4">Torsdag</option>
+            <option value="5">Fredag</option>
+            <option value="6">Lørdag</option>
+            <option value="0">Søndag</option>
+        </select>
+        
+        <!-- Dropdown for Tid/Hendelse -->
+        <select id="debug-time">
+            <option value="14:0">Ingen Melding (14:00)</option>
+            <option value="8:2">Velkommen (08:02)</option>
+            <option value="10:20">Varsel 10:30 (10:20)</option>
+            <option value="10:35">Lunsj 10:30 (10:35)</option>
+            <option value="10:50">Varsel 11:00 (10:50)</option>
+            <option value="11:5">Lunsj 11:00 (11:05)</option>
+            <option value="11:20">Varsel 11:30 (11:20)</option>
+            <option value="11:35">Lunsj 11:30 (11:35)</option>
+            <option value="15:35">Hjem (15:35)</option>
+            <option value="16:5">Etter Tid (16:05)</option>
+        </select>
+        
+        <!-- Simuler-knapp -->
+        <button id="simulate-btn">Simuler</button>
+        
+        <!-- Reset-knapp -->
+        <button id="reset-sim-btn">Reset (Ekte tid)</button>
+    </div>
+    <!-- Slutt på debug-panel -->
+
+    <!-- 5. Link til den nye, separate JavaScript-filen -->
+    <script src="lunch.script.js" defer></script>
+
+</body>
+</html>
