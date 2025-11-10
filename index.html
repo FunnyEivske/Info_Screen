@@ -4,107 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buss & Vær Dashboard</title>
-    <!-- 1. Include Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 2. Import Font Awesome for icons -->
+    <!-- 1. Import Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- 3. Configure Tailwind and add Inter font -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    },
-                },
-            },
-        }
-    </script>
     
-    <!-- 4. Import Inter font from Google Fonts -->
+    <!-- 2. Import Inter font from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <style>
-        /* 5. Apply the Inter font to the body */
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #111827; /* bg-gray-900 */
-        }
-    </style>
+    <!-- 3. Link to our external stylesheet (No Tailwind) -->
+    <link rel="stylesheet" href="style.css">
+
 </head>
-<body class="bg-gray-900 text-gray-100 p-4 md:p-6 lg:p-8 min-h-screen flex flex-col">
+<body>
 
     <!-- Main Content Grid -->
-    <!-- Endret grid-cols-3 til grid-cols-5 for å tillate justering av kolonnebredde -->
-    <div class="flex-grow w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-5 gap-6 lg:gap-8">
+    <div class="main-grid-container">
         
         <!-- Column 1: Universitetet -->
-        <!-- Lagt til md:col-span-2 for å gjøre denne kolonnen bredere -->
-        <div class="bg-gray-800/50 p-4 rounded-lg flex flex-col md:col-span-2">
+        <div class="card bus-column">
             <!-- Header -->
-            <div class="flex justify-between items-center pb-2 border-b border-gray-700">
-                <h2 class="text-2xl font-bold text-yellow-400">Universitetet</h2>
-                <!-- Added id="clock-1" and sizing for live clock -->
-                <div id="clock-1" class="text-2xl font-bold bg-yellow-400 text-black px-3 py-1 rounded w-24 text-center">--:--</div>
+            <div class="card-header">
+                <h2 class="card-title">Universitetet</h2>
+                <div id="clock-1" class="clock-box">--:--</div>
             </div>
-            <!-- Schedule List (Replaced with Iframe) -->
-            <div class="mt-4 flex-grow">
+            <!-- Schedule List (Iframe) -->
+            <div class="iframe-container">
                 <iframe 
                     src="https://skilt.akt.no/Tmix.Cap.DigSig.Gui/App/Rtpi.aspx?numberOfRows=20&stopPointIds=9040029,9040030" 
-                    class="w-full h-full border-0 rounded-lg"
-                    style="min-height: 500px;" 
+                    class="bus-iframe"
                     title="Universitetet Departures"
                 ></iframe>
             </div>
         </div>
 
         <!-- Column 2: Weather & Logs -->
-        <!-- Lagt til md:col-span-1 for å sette denne til 1 (smalere) -->
-        <div class="flex flex-col justify-center items-center gap-8 md:col-span-1">
+        <div class="weather-column">
             <!-- Weather -->
-            <div class="text-center space-y-6">
+            <div class="weather-block">
                 <div>
-                    <div class="text-3xl font-semibold">Grimstad</div>
-                    <!-- Added ID and default text -->
-                    <div id="temp-grimstad" class="text-7xl font-light text-red-400">…</div>
+                    <div class="weather-city">Grimstad</div>
+                    <div id="temp-grimstad" class="weather-temp">…</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-semibold">Kristiansand</div>
-                    <!-- Added ID and default text -->
-                    <div id="temp-kristiansand" class="text-7xl font-light text-red-400">…</div>
+                    <div class="weather-city">Kristiansand</div>
+                    <div id="temp-kristiansand" class="weather-temp">…</div>
                 </div>
                 <div>
-                    <div class="text-3xl font-semibold">Arendal</div>
-                    <!-- Added ID and default text -->
-                    <div id="temp-arendal" class="text-7xl font-light text-red-400">…</div>
+                    <div class="weather-city">Arendal</div>
+                    <div id="temp-arendal" class="weather-temp">…</div>
                 </div>
             </div>
             <!-- Logs -->
-            <!-- Added ID and cleared static content -->
-            <div id="log-box" class="w-full max-w-sm bg-gray-800 p-4 rounded-lg font-mono text-xs text-gray-400 h-24 overflow-y-auto">
+            <div id="log-box">
                 <p>Initialiserer...</p>
             </div>
         </div>
 
         <!-- Column 3: Avganger -->
-        <!-- Lagt til md:col-span-2 for å gjøre denne kolonnen bredere -->
-        <div class="bg-gray-800/50 p-4 rounded-lg flex flex-col md:col-span-2">
+        <div class="card bus-column">
             <!-- Header -->
-            <div class="flex justify-between items-center pb-2 border-b border-gray-700">
-                <h2 class="text-2xl font-bold text-yellow-400">Avganger</h2>
-                <!-- Added id="clock-2" and sizing for live clock -->
-                <div id="clock-2" class="text-2xl font-bold bg-yellow-400 text-black px-3 py-1 rounded w-24 text-center">--:--</div>
+            <div class="card-header">
+                <h2 class="card-title">Avganger</h2>
+                <div id="clock-2" class="clock-box">--:--</div>
             </div>
-            <!-- Schedule List (Replaced with Iframe) -->
-            <div class="mt-4 flex-grow">
+            <!-- Schedule List (Iframe) -->
+            <div class="iframe-container">
                 <iframe 
                     src="https://skilt.akt.no/Tmix.Cap.DigSig.Gui/App/Rtpi.aspx?numberOfRows=20&stopPointIds=9040031,9040032" 
-                    class="w-full h-full border-0 rounded-lg"
-                    style="min-height: 500px;" 
+                    class="bus-iframe"
                     title="Avganger Departures"
                 ></iframe>
             </div>
@@ -113,235 +82,20 @@
     </div>
 
     <!-- Bottom Ticker Bar -->
-    <div class="w-full max-w-7xl mx-auto mt-6 lg:mt-8">
-        <div class="bg-gray-800 p-3 rounded-lg flex items-center gap-4">
-            <div class="bg-blue-600 text-white font-bold p-2 px-3 rounded">NRK</div>
-            <!-- Added ID for live data -->
-            <p id="nrk-headline" class="flex-grow text-gray-300 truncate">
-                Laster nyheter...
-            </p>
-            <div class="bg-cyan-500 text-white font-bold h-10 w-10 flex items-center justify-center rounded-full text-lg">YR</div>
+    <div class="ticker-wrapper">
+        <div class="ticker-bar">
+            <div class="tag nrk-tag">NRK</div>
+            <p id="nrk-headline">Laster nyheter...</p>
+            <div class="tag yr-tag">YR</div>
         </div>
-        <div class="text-center text-gray-500 text-sm mt-3">
-            Designed by Eivind_n.s with <span class="text-red-500">♥</span>
+        <div class="footer">
+            Designed by Eivind_n.s with <span>♥</span>
         </div>
     </div>
 
-    <!-- JavaScript for Live Clock -->
-    <script>
-        function updateClocks() {
-            // Get current time in HH:MM format (24-hour)
-            const now = new Date();
-            // Using Norwegian time formatting
-            const options = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Oslo' };
-            const timeString = new Intl.DateTimeFormat('nb-NO', options).format(now);
-            
-            // Update clock elements
-            const clock1 = document.getElementById('clock-1');
-            const clock2 = document.getElementById('clock-2');
-            
-            if (clock1) {
-                clock1.textContent = timeString;
-            }
-            if (clock2) {
-                clock2.textContent = timeString;
-            }
-        }
-    </script>
-    
-    <!-- START: SCRIPT FOR LIVE WEATHER AND NEWS -->
-    <script>
-        // --- Constants ---
-        // Endret USER_AGENT for å fjerne e-posten. Dette er tryggere for publisering.
-        const USER_AGENT = 'Eivind-Dashboard/1.0 (github.com/Eivind_n.s)';
-        const LOCATIONS = [
-            { id: 'grimstad',     name: 'Grimstad',     latitude: 58.33455833890616, longitude: 8.577132411967785 },
-            { id: 'kristiansand', name: 'Kristiansand', latitude: 58.16329955371125, longitude: 8.00258786985478  },
-            { id: 'arendal',      name: 'Arendal',      latitude: 58.46086657739493, longitude: 8.764345505384163 }
-        ];
-        
-        // --- NRK RSS URL (Back to this one) ---
-        const NRK_RSS_URL = 'https://www.nrk.no/nyheter/siste.rss';
-        
-        // --- NEW CORS Proxy ---
-        // Using corsproxy.io which seems more reliable
-        const CORS_PROXY_PREFIX = 'https://corsproxy.io/?';
-
-        // --- Global cache for news ---
-        let nrkHeadlines = [];
-        let currentNewsIndex = 0;
-
-        /**
-         * Logs a message to the status box on the page.
-         */
-        function logStatus(msg) {
-            const logBox = document.getElementById('log-box');
-            if (!logBox) return;
-            const time = new Date().toLocaleTimeString('nb-NO');
-            const newLogEntry = document.createElement('p');
-            newLogEntry.textContent = `[${time}] - ${msg}`;
-            // Add new log to the top
-            logBox.prepend(newLogEntry);
-            // Keep log box clean
-            while (logBox.children.length > 10) {
-                logBox.removeChild(logBox.lastChild);
-            }
-        }
-
-        /**
-         * Fetches weather data from MET.no for all locations.
-         */
-        async function updateWeather() {
-            logStatus('⏳ Henter værdata...');
-            
-            LOCATIONS.forEach(async (loc) => {
-                // We must URL-encode the target URL for the proxy
-                // Note: We are NOT encoding the '?' or '=' from the proxy itself.
-                const targetUrl = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${loc.latitude}&lon=${loc.longitude}`;
-                const proxyUrl = `${CORS_PROXY_PREFIX}${encodeURIComponent(targetUrl)}`;
-                
-                try {
-                    const response = await fetch(proxyUrl, {
-                        headers: {
-                            // This proxy requires an Origin header, but a random one often works
-                            'Origin': 'https://example.com',
-                            // We ALSO have to set the User-Agent, which is why we need the proxy
-                            'User-Agent': USER_AGENT
-                        }
-                    }); 
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status} for ${loc.name}`);
-                    }
-                    
-                    const data = await response.json(); // This proxy returns JSON directly
-                    
-                    const temp = data?.properties?.timeseries?.[0]?.data?.instant?.details?.air_temperature;
-
-                    const tempEl = document.getElementById(`temp-${loc.id}`);
-                    if (tempEl && typeof temp === 'number') {
-                        tempEl.textContent = `${temp.toFixed(1)}°`;
-                        logStatus(`✅ Vær oppdatert for ${loc.name}: ${temp.toFixed(1)}°`);
-                    } else {
-                        logStatus(`ℹ️ Kunne ikke parse temp for ${loc.name}.`);
-                    }
-
-                } catch (error) {
-                    console.error('Weather fetch error:', error);
-                    logStatus(`❌ Vær-feil ${loc.name}: ${error.message}`);
-                    const tempEl = document.getElementById(`temp-${loc.id}`);
-                    if (tempEl) tempEl.textContent = 'Feil';
-                }
-            });
-        }
-
-        /**
-         * Fetches and parses the NRK RSS feed.
-         */
-        async function fetchNews() {
-            logStatus('⏳ Henter NRK-nyheter (RSS)...');
-            const proxyUrl = `${CORS_PROXY_PREFIX}${encodeURIComponent(NRK_RSS_URL)}`;
-
-            try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const xmlText = await response.text();
-                
-                // Parse the XML text
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xmlText, "text/xml");
-                
-                const items = xmlDoc.querySelectorAll("item");
-                
-                if (items.length === 0) {
-                     // Check for common XML parse error
-                    const parseError = xmlDoc.querySelector("parsererror");
-                    if (parseError) {
-                        throw new Error(`XML Parsefeil: ${parseError.textContent}`);
-                    }
-                    throw new Error('Ingen <item> funnet i RSS feed.');
-                }
-
-                const headlines = [];
-                items.forEach(item => {
-                    const title = item.querySelector("title")?.textContent;
-                    if (title) {
-                        // Fjerner CDATA-wrapper hvis den finnes
-                        headlines.push(title.replace("<![CDATA[", "").replace("]]>", "").trim());
-                    }
-                });
-                
-                nrkHeadlines = headlines.slice(0, 10).filter(Boolean); // Get top 10 valid headlines
-
-                if (nrkHeadlines.length > 0) {
-                    logStatus(`✅ Nyheter lastet (${nrkHeadlines.length} overskrifter)`);
-                    rotateNews(true); // 'true' to reset index
-                } else {
-                    throw new Error('Ingen nyhetsoverskrifter funnet.');
-                }
-
-            } catch (error) {
-                console.error('News fetch error:', error);
-                logStatus(`❌ Nyhets-feil: ${error.message}`);
-                const headlineEl = document.getElementById('nrk-headline');
-                if (headlineEl) headlineEl.textContent = 'Kunne ikke laste nyheter.';
-            }
-        }
-
-        /**
-         * Rotates the news headline in the ticker.
-         */
-        function rotateNews(reset = false) {
-            if (nrkHeadlines.length === 0) return;
-            
-            if (reset) {
-                currentNewsIndex = 0;
-            }
-
-            const headlineEl = document.getElementById('nrk-headline');
-            if (headlineEl) {
-                // Add a simple fade effect for transition
-                headlineEl.style.opacity = 0;
-                setTimeout(() => {
-                    // Check if headline exists before trying to show it
-                    if (nrkHeadlines[currentNewsIndex]) {
-                       headlineEl.textContent = nrkHeadlines[currentNewsIndex];
-                    }
-                    headlineEl.style.opacity = 1;
-                }, 300); // 300ms fade
-            }
-            
-            // Go to next headline
-            currentNewsIndex = (currentNewsIndex + 1) % nrkHeadlines.length;
-        }
-
-        // --- Initial Load and Timers ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Clear initial log
-            const logBox = document.getElementById('log-box');
-            if (logBox) logBox.innerHTML = '';
-            
-            // Run clock (from existing script)
-            updateClocks();
-            setInterval(updateClocks, 10000); // Oppdater klokke hvert 10. sek
-
-            // Fetch data immediately on load
-            updateWeather();
-            fetchNews();
-
-            // Set intervals to re-fetch data
-            setInterval(updateWeather, 15 * 60 * 1000); // Vær: Hvert 15. min
-            setInterval(fetchNews, 5 * 60 * 1000);   // Nyheter: Hvert 5. min
-            
-            // Set interval to rotate news
-            setInterval(rotateNews, 10000); // Roter nyhet hver 10. sekund
-        });
-
-    </script>
-    <!-- END: SCRIPT -->
+    <!-- Link to the external JavaScript file. 
+         'defer' ensures it runs after the HTML is parsed. -->
+    <script src="script.js" defer></script>
 
 </body>
 </html>
