@@ -11,8 +11,12 @@ body {
     color: #F3F4F6; /* text-gray-100 */
     padding: 1rem; /* p-4 */
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    
+    /* --- ENDRING: Byttet fra flex til grid --- */
+    display: grid;
+    /* 1fr = all tilgjengelig plass, auto = kun plassen den trenger */
+    grid-template-rows: 1fr auto; 
+    /* flex-direction: column; (Fjernet) */
 }
 
 /* Responsiv padding fra body */
@@ -25,7 +29,10 @@ body {
 
 /* --- Hoved-layout (Grid) --- */
 .main-grid-container {
-    flex-grow: 1;
+    /* flex-grow: 1; (Fjernet) */
+    height: 100%; /* NY: Fyll den nye grid-raden */
+    min-height: 0; /* NY: Trikse-fiks for eldre nettlesere */
+
     width: 100%;
     max-width: 80rem; /* max-w-7xl */
     margin-left: auto;
@@ -54,6 +61,7 @@ body {
     border-radius: 0.5rem; /* rounded-lg */
     display: flex;
     flex-direction: column;
+    height: 100%; /* NY: Sørger for at kortet fyller grid-cellen sin */
 }
 
 .card-header {
@@ -110,6 +118,7 @@ body {
     justify-content: center;
     align-items: center;
     gap: 2rem; /* gap-8 */
+    height: 100%; /* NY: Sørger for at kolonnen fyller grid-cellen sin */
 }
 
 /* Setter kolonnebredde på medium skjermer */
