@@ -34,9 +34,7 @@ body {
     min-height: 0; /* NY: Trikse-fiks for eldre nettlesere */
 
     width: 100%;
-    max-width: 80rem; /* max-w-7xl */
-    margin-left: auto;
-    margin-right: auto;
+    /* Fjernet max-width, margin-left, margin-right for å la den fylle skjermen */
     display: grid;
     grid-template-columns: 1fr; /* grid-cols-1 */
     gap: 1.5rem; /* gap-6 */
@@ -173,9 +171,7 @@ body {
 /* --- Bunn-ticker (Nyheter) --- */
 .ticker-wrapper {
     width: 100%;
-    max-width: 80rem; /* max-w-7xl */
-    margin-left: auto;
-    margin-right: auto;
+    /* Fjernet max-width, margin-left, margin-right for å la den fylle skjermen */
     margin-top: 1.5rem; /* mt-6 */
 }
 @media (min-width: 1024px) {
@@ -190,7 +186,7 @@ body {
     border-radius: 0.5rem; /* rounded-lg */
     display: flex;
     align-items: center;
-    gap: 1rem; /* gap-4 */
+    gap: 1.5rem; /* ENDRET: Fra 1rem (gap-4) til 1.5rem (gap-6) */
 }
 
 .tag {
