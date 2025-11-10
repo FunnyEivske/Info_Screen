@@ -85,6 +85,15 @@ function updateWeather() {
                     }
 
                     if (tempEl && temp !== null) {
+                        
+                        // --- START: Ny logikk for farge ---
+                        if (temp >= 0) {
+                            tempEl.style.color = '#B21002'; // Varm farge (som forespurt)
+                        } else {
+                            tempEl.style.color = '#1767CE'; // Kald farge (som forespurt)
+                        }
+                        // --- SLUTT: Ny logikk for farge ---
+
                         tempEl.textContent = temp.toFixed(1) + '°';
                         logStatus('✅ Vær oppdatert for ' + loc.name + ': ' + temp.toFixed(1) + '°');
                     } else {

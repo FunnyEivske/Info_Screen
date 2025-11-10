@@ -88,7 +88,7 @@ body {
     height: 100%;
     border: 0;
     border-radius: 0.5rem; /* rounded-lg */
-    min-height: 500px;
+    /* Fjernet min-height: 500px; for å la den fylle plassen vertikalt */
 }
 
 /* --- Klokke --- */
@@ -139,7 +139,7 @@ body {
 #temp-grimstad, #temp-kristiansand, #temp-arendal, .weather-temp { /* La til .weather-temp for backup */
     font-size: 4.5rem; /* text-7xl */
     line-height: 1;
-    font-weight: 300; /* font-light */
+    font-weight: 700; /* ENDRET: Fra 300 (light) til 700 (bold) */
     color: #F87171; /* text-red-400 */
 }
 
@@ -177,7 +177,7 @@ body {
 
 .ticker-bar {
     background-color: #1F2937; /* bg-gray-800 */
-    padding: 0.75rem; /* p-3 */
+    padding: 1.25rem; /* p-5 (var p-3) */
     border-radius: 0.5rem; /* rounded-lg */
     display: flex;
     align-items: center;
@@ -187,9 +187,10 @@ body {
 .tag {
     color: #FFFFFF; /* text-white */
     font-weight: 700; /* font-bold */
-    padding: 0.5rem; /* p-2 */
+    padding: 0.75rem; /* p-3 (var p-2) */
     border-radius: 0.25rem; /* rounded */
     flex-shrink: 0; /* Forhindrer at tag-en krymper */
+    font-size: 1.125rem; /* text-lg (NY) */
 }
 
 .nrk-tag {
@@ -205,17 +206,18 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     margin: 0; /* Fjerner <p> margin */
+    font-size: 1.25rem; /* text-xl (NY) */
 }
 
 .yr-tag {
     background-color: #06B6D4; /* bg-cyan-500 */
-    height: 2.5rem; /* h-10 */
-    width: 2.5rem; /* w-10 */
+    height: 3rem; /* h-12 (var h-10) */
+    width: 3rem; /* w-12 (var w-10) */
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 9999px; /* rounded-full */
-    font-size: 1.125rem; /* text-lg */
+    font-size: 1.25rem; /* text-xl (var text-lg) */
     line-height: 1.75rem;
 }
 
