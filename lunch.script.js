@@ -99,17 +99,18 @@ function checkTime(forceHour, forceMinute, forceDay) {
     if (hour >= 16 || hour < 8) {
         afterHoursScreen.style.display = 'flex';
         videoBackground.style.opacity = '0';
-        messageOverlay.style.display = 'none';
+        messageOverlay.classList.remove('visible'); // ENDRET: Bruker classList
     } 
     else {
         afterHoursScreen.style.display = 'none';
         videoBackground.style.opacity = '1';
 
+        // ENDRET: Bytter fra style.display til classList
         if (message) {
             messageText.innerHTML = message;
-            messageOverlay.style.display = 'flex';
+            messageOverlay.classList.add('visible');
         } else {
-            messageOverlay.style.display = 'none';
+            messageOverlay.classList.remove('visible');
         }
     }
 }

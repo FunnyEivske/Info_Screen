@@ -10,13 +10,26 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
     
-    <!-- 2. Link til den nye, separate CSS-filen -->
+    <!-- 2. Link til den separate CSS-filen -->
     <link rel="stylesheet" href="lunch.style.css">
 </head>
 <body>
 
-    <!-- 1. Bakgrunnsbilde -->
-    <div id="video-background"></div>
+    <!-- 1. ENDRET: Bytter fra YouTube iframe til HTML5 <video> -->
+    <div id="video-background">
+        <!-- 
+            Bruker en direkte .mp4-fil for å unngå YouTube-blokkering.
+            - autoplay, muted, loop: Nødvendig for automatisk avspilling
+            - playsinline: For bedre kompatibilitet
+        -->
+        <video 
+            src="https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4" 
+            autoplay 
+            muted 
+            loop 
+            playsinline>
+        </video>
+    </div>
 
     <!-- 2. Meldings-overlay -->
     <div id="message-overlay">
@@ -25,11 +38,11 @@
 
     <!-- 3. "Etter stengetid"-skjerm -->
     <div id="after-hours">
-        <!-- Bytter til hvit logo for svart bakgrunn -->
-        <img id="uia-logo" src="https://www.uia.no/om-uia/profil/logofiler/uia-logo-hvit-bokmal_svg.svg" alt="Universitetet i Agder Logo">
+        <!-- Bytter til den PNG-logoen du sendte -->
+        <img id="uia-logo" src="https://file.garden/Z-PhMwF-KmRdflZZ/Uia/uia-horisontal-med-navn-positiv.png" alt="Universitetet i Agder Logo">
     </div>
 
-    <!-- 4. Fullstendig nytt Debug-panel -->
+    <!-- 4. Debug-panel -->
     <div id="debug-controls">
         <div id="debug-display">Laster...</div>
         
@@ -66,7 +79,7 @@
     </div>
     <!-- Slutt på debug-panel -->
 
-    <!-- 5. Link til den nye, separate JavaScript-filen -->
+    <!-- 5. Link til den separate JavaScript-filen -->
     <script src="lunch.script.js" defer></script>
 
 </body>
