@@ -10,7 +10,7 @@ body, html {
     overflow: hidden; /* Skjuler scrollbars */
 }
 
-/* ENDRET: Container for bakgrunnsvideo */
+/* Container for bakgrunnsvideo */
 #video-background {
     position: fixed;
     top: 0;
@@ -19,12 +19,11 @@ body, html {
     height: 100%;
     z-index: 1;
     transition: opacity 0.5s ease-in-out;
-    overflow: hidden; /* NY: Skjuler iframe-kanter */
+    overflow: hidden; /* Skjuler iframe-kanter */
 }
 
-/* ENDRET: Bytter fra 'iframe' til 'video' og bruker en
-   mer robust "cover"-metode. */
-#video-background video {
+/* Stil for iframe (Mega.nz) */
+#video-background iframe {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -33,11 +32,10 @@ body, html {
     min-height: 100%;
     width: auto;
     height: auto;
-    pointer-events: none; /* Gjør at man ikke kan klikke på videoen */
 }
 
 
-/* ENDRET: Overlay for meldinger (Nå en "News Bar") */
+/* Overlay for meldinger ("News Bar") */
 #message-overlay {
     position: fixed;
     bottom: 0; /* Plassert i bunnen */
@@ -58,14 +56,14 @@ body, html {
     padding: 20px;
     box-sizing: border-box; /* Sørger for at padding er inkludert */
 
-    /* NY: Animasjonslogikk */
+    /* Animasjonslogikk */
     opacity: 0;
     transform: translateY(100%); /* Starter utenfor skjermen */
     pointer-events: none;
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
 
-/* NY: Klasse for å vise baren */
+/* Klasse for å vise baren */
 #message-overlay.visible {
     opacity: 1;
     transform: translateY(0); /* Beveger seg inn på skjermen */
@@ -93,57 +91,4 @@ body, html {
     max-width: 400px;
 }
 
-/* --- ENDRET: Debug-knapper --- */
-#debug-controls {
-    position: fixed;
-    top: 10px; /* FLYTTET: Fra bunn til topp */
-    left: 10px;
-    z-index: 100;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 10px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap; 
-    gap: 10px; 
-    align-items: center;
-}
-
-/* Felles stil for knapper og dropdowns */
-#debug-controls button,
-#debug-controls select {
-    background-color: #f0f0f0;
-    color: #333;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 0.9em;
-}
-
-#debug-controls button:hover,
-#debug-controls select:hover {
-    background-color: #ddd;
-}
-
-/* Stil for "Simuler"-knappen */
-#simulate-btn {
-    background-color: #4CAF50; /* Grønn */
-    color: white;
-}
-#simulate-btn:hover {
-    background-color: #45a049;
-}
-
-/* Stil for debug-display */
-#debug-display {
-    background-color: #333;
-    color: #f0f0f0;
-    padding: 8px 12px;
-    border-radius: 5px;
-    font-family: monospace;
-    font-size: 0.9em;
-    text-align: center;
-}
+/* --- Debug-knapper (Fjernet) --- */

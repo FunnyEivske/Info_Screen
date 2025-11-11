@@ -15,20 +15,14 @@
 </head>
 <body>
 
-    <!-- 1. ENDRET: Bytter fra YouTube iframe til HTML5 <video> -->
+    <!-- 1. Bakgrunnsvideo -->
     <div id="video-background">
-        <!-- 
-            Bruker en direkte .mp4-fil for å unngå YouTube-blokkering.
-            - autoplay, muted, loop: Nødvendig for automatisk avspilling
-            - playsinline: For bedre kompatibilitet
-        -->
-        <video 
-            src="https://videos.pexels.com/video-files/3209828/3209828-hd_1280_720_25fps.mp4" 
-            autoplay 
-            muted 
-            loop 
-            playsinline>
-        </video>
+        <iframe 
+            frameborder="0" 
+            src="https://mega.nz/embed/ukpBTDyK#HBbQrsLEtTsHQc2fi_qCCJtGuvBLJ1rPfOFPYPmMtmk!1a1m" 
+            allowfullscreen 
+            allow="autoplay;">
+        </iframe>
     </div>
 
     <!-- 2. Meldings-overlay -->
@@ -38,46 +32,10 @@
 
     <!-- 3. "Etter stengetid"-skjerm -->
     <div id="after-hours">
-        <!-- Bytter til den PNG-logoen du sendte -->
         <img id="uia-logo" src="https://file.garden/Z-PhMwF-KmRdflZZ/Uia/uia-horisontal-med-navn-positiv.png" alt="Universitetet i Agder Logo">
     </div>
 
-    <!-- 4. Debug-panel -->
-    <div id="debug-controls">
-        <div id="debug-display">Laster...</div>
-        
-        <!-- Dropdown for Dag -->
-        <select id="debug-day">
-            <option value="1">Mandag</option>
-            <option value="2">Tirsdag</option>
-            <option value="3">Onsdag</option>
-            <option value="4">Torsdag</option>
-            <option value="5">Fredag</option>
-            <option value="6">Lørdag</option>
-            <option value="0">Søndag</option>
-        </select>
-        
-        <!-- Dropdown for Tid/Hendelse -->
-        <select id="debug-time">
-            <option value="14:0">Ingen Melding (14:00)</option>
-            <option value="8:2">Velkommen (08:02)</option>
-            <option value="10:20">Varsel 10:30 (10:20)</option>
-            <option value="10:35">Lunsj 10:30 (10:35)</option>
-            <option value="10:50">Varsel 11:00 (10:50)</option>
-            <option value="11:5">Lunsj 11:00 (11:05)</option>
-            <option value="11:20">Varsel 11:30 (11:20)</option>
-            <option value="11:35">Lunsj 11:30 (11:35)</option>
-            <option value="15:35">Hjem (15:35)</option>
-            <option value="16:5">Etter Tid (16:05)</option>
-        </select>
-        
-        <!-- Simuler-knapp -->
-        <button id="simulate-btn">Simuler</button>
-        
-        <!-- Reset-knapp -->
-        <button id="reset-sim-btn">Reset (Ekte tid)</button>
-    </div>
-    <!-- Slutt på debug-panel -->
+    <!-- 4. Debug-panel (Fjernet) -->
 
     <!-- 5. Link til den separate JavaScript-filen -->
     <script src="lunch.script.js" defer></script>

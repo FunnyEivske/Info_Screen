@@ -32,33 +32,20 @@ var lunchSchedule = {
     6: { "10:30": "-", "11:00": "-", "11:30": "-" }  // Lørdag
 };
 
-// Hjelpe-array for dager
-var dayNames = ["Søndag", "Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "Lørdag"];
-
 // Variabel for å holde styr på auto-oppdatering
 var simuleringsIntervall = null;
 
 /**
  * Hovedfunksjon som sjekker tiden og oppdaterer skjermen.
- * Kan overstyres med 'force'-variabler for simulering.
+ * ENDRET: Kjører nå kun på ekte tid.
  */
-function checkTime(forceHour, forceMinute, forceDay) {
+function checkTime() {
     var now = new Date();
     
-    var hour = (forceHour !== undefined) ? forceHour : now.getHours();
-    var minute = (forceMinute !== undefined) ? forceMinute : now.getMinutes();
-    var dayOfWeek = (forceDay !== undefined) ? forceDay : now.getDay(); 
-
-    // Oppdater debug-display
-    var debugDisplay = document.getElementById('debug-display');
-    if (debugDisplay) {
-        var dayStr = dayNames[dayOfWeek];
-        // Manuell padding for 'eldre' stil
-        var hourStr = String(hour).length < 2 ? '0' + hour : String(hour);
-        var minStr = String(minute).length < 2 ? '0' + minute : String(minute);
-        var prefix = (forceHour !== undefined) ? "Sim:" : "Ekte tid:";
-        debugDisplay.textContent = prefix + " " + dayStr + " " + hourStr + ":" + minStr;
-    }
+    // Bruker kun ekte tid
+    var hour = now.getHours();
+    var minute = now.getMinutes();
+    var dayOfWeek = now.getDay(); 
 
     // Hent DOM-elementer
     var messageOverlay = document.getElementById('message-overlay');
@@ -99,13 +86,12 @@ function checkTime(forceHour, forceMinute, forceDay) {
     if (hour >= 16 || hour < 8) {
         afterHoursScreen.style.display = 'flex';
         videoBackground.style.opacity = '0';
-        messageOverlay.classList.remove('visible'); // ENDRET: Bruker classList
+        messageOverlay.classList.remove('visible'); 
     } 
     else {
         afterHoursScreen.style.display = 'none';
         videoBackground.style.opacity = '1';
 
-        // ENDRET: Bytter fra style.display til classList
         if (message) {
             messageText.innerHTML = message;
             messageOverlay.classList.add('visible');
@@ -116,37 +102,19 @@ function checkTime(forceHour, forceMinute, forceDay) {
 }
 
 /**
- * Nullstiller simuleringen og går tilbake til å vise ekte tid.
+ * Starter den automatiske oppdateringen av klokken.
  */
-function resetSimulering() {
+function startAutoOppdatering() {
     clearInterval(simuleringsIntervall); // Stopp eventuell gammel timer
     checkTime(); // Kjør med ekte tid umiddelbart
-    simuleringsIntervall = setInterval(checkTime, 10000); // Start ny timer (uten argumenter)
+    simuleringsIntervall = setInterval(checkTime, 10000); // Start ny timer
 }
 
 // --- Initial Load og Timere ---
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Sett opp "Simuler"-knappen
-    document.getElementById('simulate-btn').addEventListener('click', function() {
-        clearInterval(simuleringsIntervall); // Stopp auto-oppdatering
-        
-        var day = document.getElementById('debug-day').value;
-        var time = document.getElementById('debug-time').value;
-        
-        var parts = time.split(':');
-        var hour = parseInt(parts[0], 10);
-        var minute = parseInt(parts[1], 10);
-        
-        // Kjør simuleringen
-        checkTime(hour, minute, parseInt(day, 10));
-    });
-
-    // Sett opp "Reset"-knappen
-    document.getElementById('reset-sim-btn').addEventListener('click', function() {
-        resetSimulering();
-    });
+    // FJernet: Event listeners for knapper
 
     // Start med ekte tid
-    resetSimulering();
+    startAutoOppdatering();
 });
