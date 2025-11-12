@@ -1,50 +1,47 @@
-<!DOCTYPE html>
-<html lang="no">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunsj</title>
-    
-    <!-- 1. Import Inter font from Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
-    
-    <!-- 2. Link til den separate CSS-filen -->
-    <link rel="stylesheet" href="lunch.style.css">
-</head>
-<body>
+    <!DOCTYPE html>
+    <html lang="no">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Lunsj</title>
+        
+        <!-- 1. Import Inter font from Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+        
+        <!-- 2. Link til den separate CSS-filen -->
+        <link rel="stylesheet" href="lunch.style.css">
+    </head>
+    <body>
 
-    <!-- 1. Bakgrunnsvideo (Erstattet) -->
-    <!--
-    <div id="video-background">
-        <iframe 
-            frameborder="0" 
-            src="https://www.youtube-nocookie.com/embed/gpye1q201n8?autoplay=1&mute=1&loop=1&playlist=gpye1q201n8&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0" 
-            allow="autoplay; mute"
-            referrerpolicy="strict-origin-when-cross-origin"
-            allowfullscreen>
-        </iframe>
-    </div>
-    -->
+        <!-- NY VAKT-BAR -->
+        <div id="vakt-bar">
+            <div class="vakt-seksjon">
+                <h3>Skranke</h3>
+                <p id="skranke-vakt-navn">-</p>
+            </div>
+            <div class="vakt-seksjon">
+                <h3>Backoffice</h3>
+                <p id="backoffice-vakt-navn">-</p>
+            </div>
+        </div>
 
-    <!-- 1. NY Akvarium-bakgrunn -->
-    <canvas id="aquarium-canvas"></canvas>
+        <!-- 1. Akvarium-bakgrunn -->
+        <canvas id="aquarium-canvas"></canvas>
 
-    <!-- 2. Meldings-overlay -->
-    <div id="message-overlay">
-        <span id="message-text"></span>
-    </div>
+        <!-- 2. Meldings-overlay -->
+        <div id="message-overlay">
+            <span id="message-text"></span>
+        </div>
 
-    <!-- 3. "Etter stengetid"-skjerm -->
-    <div id="after-hours">
-        <img id="uia-logo" src="https://file.garden/Z-PhMwF-KmRdflZZ/Uia/uia-horisontal-med-navn-positiv.png" alt="Universitetet i Agder Logo">
-    </div>
+        <!-- 3. "Etter stengetid"-skjerm -->
+        <div id="after-hours">
+            <img id="uia-logo" src="https://file.garden/Z-PhMwF-KmRdflZZ/Uia/uia-horisontal-med-navn-positiv.png" alt="Universitetet i Agder Logo">
+        </div>
 
-    <!-- 4. Debug-panel (Fjernet) -->
+        <!-- 5. Link til den separate JavaScript-filen -->
+        <script src="lunch.script.js" defer></script>
 
-    <!-- 5. Link til den separate JavaScript-filen -->
-    <script src="lunch.script.js" defer></script>
-
-</body>
-</html>
+    </body>
+    </html>
