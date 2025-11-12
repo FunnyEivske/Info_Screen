@@ -125,15 +125,17 @@ document.addEventListener('DOMContentLoaded', function() {
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas(); // Sett størrelse umiddelbart
         initAquarium();
-        animateAquarium();
+        
+        // ENDRING: Byttet fra requestAnimationFrame til setInterval
+        // 16ms = ca 60fps. TV-en vil kanskje kjøre saktere, men dette er mer kompatibelt.
+        setInterval(animateAquarium, 16); 
     } else {
         console.error("Fant ikke 'aquarium-canvas' ved DOMContentLoaded.");
     }
 });
 
 
-/* --- DEL 2: NY Akvarium-logikk --- */
-/* (Denne koden er lagt til på bunnen av filen) */
+/* --- DEL 2: NY Akvarium-logikk (ES5-kompatibel) --- */
 
 var canvas = null; // Initialiseres i initAquarium
 var ctx = null; // Initialiseres i initAquarium
@@ -141,144 +143,124 @@ var fishTank = [];
 var fishCount = 20; // Antall fisker
 var fishColors = ['#FF4136', '#FF851B', '#2ECC40', '#0074D9', '#B10DC9'];
 
-// NY: Bobler
 var bubbleTank = [];
 var bubbleCount = 30;
 
 // Sørg for at canvas fyller skjermen
-// KORRIGERT: Henter elementet lokalt så den fungerer før initAquarium
 function resizeCanvas() {
     var localCanvas = document.getElementById('aquarium-canvas');
     if (localCanvas) {
         localCanvas.width = window.innerWidth;
         localCanvas.height = window.innerHeight;
         
-        // Oppdater global variabel hvis den ikke er satt
         if (!canvas) {
             canvas = localCanvas;
         }
     }
 }
 
-// NY: Klasse for bobler
-class Bubble {
-    constructor() {
-        this.x = Math.random() * (canvas ? canvas.width : window.innerWidth);
-        this.y = (Math.random() * (canvas ? canvas.height : window.innerHeight)) + (canvas ? canvas.height : window.innerHeight); // Start på bunnen
-        this.size = (Math.random() * 4) + 2; // Størrelse 2-6
-        this.dy = (Math.random() * 1.5) + 0.5; // Hastighet 0.5 - 2
-    }
+// NY: Klasse for bobler (ES5-stil)
+function Bubble() {
+    this.x = Math.random() * (canvas ? canvas.width : window.innerWidth);
+    this.y = (Math.random() * (canvas ? canvas.height : window.innerHeight)) + (canvas ? canvas.height : window.innerHeight); // Start på bunnen
+    this.size = (Math.random() * 4) + 2; // Størrelse 2-6
+    this.dy = (Math.random() * 1.5) + 0.5; // Hastighet 0.5 - 2
+}
 
-    draw() {
-        if (!ctx) return;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-    }
+Bubble.prototype.draw = function() {
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+}
 
-    update() {
-        if (!canvas) return;
-        this.y -= this.dy; // Beveger seg oppover
-        
-        // Reset hvis boblen går ut av toppen
-        if (this.y < -this.size) {
-            this.y = canvas.height + this.size;
-            this.x = Math.random() * canvas.width;
-        }
+Bubble.prototype.update = function() {
+    if (!canvas) return;
+    this.y -= this.dy; // Beveger seg oppover
+    
+    // Reset hvis boblen går ut av toppen
+    if (this.y < -this.size) {
+        this.y = canvas.height + this.size;
+        this.x = Math.random() * canvas.width;
     }
 }
 
-// Klasse for hver fisk
-class Fish {
-    constructor() {
-        this.x = Math.random() * (canvas ? canvas.width : window.innerWidth);
-        this.y = Math.random() * (canvas ? canvas.height : window.innerHeight);
-        // ENDRING: this.size er nå HALVE lengden på fisken
-        this.size = (Math.random() * 5) + 8; // Halv lengde 8-13
-        
-        this.speed = (Math.random() * 1) + 0.5; // Hastighet 0.5 - 1.5
-        
-        // Tilfeldig retning (-1 eller 1)
-        this.dx = (Math.random() > 0.5 ? 1 : -1) * this.speed;
-        this.dy = (Math.random() * 0.5 - 0.25) * this.speed; // Svømmer mest horisontalt
-        this.color = fishColors[Math.floor(Math.random() * fishColors.length)];
+// Klasse for hver fisk (ES5-stil)
+function Fish() {
+    this.x = Math.random() * (canvas ? canvas.width : window.innerWidth);
+    this.y = Math.random() * (canvas ? canvas.height : window.innerHeight);
+    this.size = (Math.random() * 5) + 8; // Halv lengde 8-13
+    this.speed = (Math.random() * 1) + 0.5; // Hastighet 0.5 - 1.5
+    this.dx = (Math.random() > 0.5 ? 1 : -1) * this.speed;
+    this.dy = (Math.random() * 0.5 - 0.25) * this.speed;
+    this.color = fishColors[Math.floor(Math.random() * fishColors.length)];
+}
+
+// Tegnemetode for fisk (ES5-stil)
+Fish.prototype.draw = function() {
+    if (!ctx) return;
+    
+    ctx.save();
+    ctx.translate(this.x, this.y); // 1. Gå til fiskens SENTER-posisjon
+
+    // 2. Speilvend HELE tegningen hvis fisken svømmer til venstre
+    if (this.dx < 0) {
+        ctx.scale(-1, 1);
     }
 
-    // ENDRING: Ny tegnemetode for fisk, SENTRERT og PEKER TIL HØYRE
-    draw() {
-        if (!ctx) return;
-        
-        ctx.save();
-        ctx.translate(this.x, this.y); // 1. Gå til fiskens SENTER-posisjon
+    // 3. Tegn fisken som om den er ved (0,0) og PEKER TIL HØYRE
+    ctx.fillStyle = this.color;
+    var halfHeight = this.size / 2;
+    
+    // Kropp
+    ctx.beginPath();
+    ctx.moveTo(this.size, 0); // Nese (peker mot +X)
+    ctx.quadraticCurveTo(this.size * 0.5, -halfHeight * 1.5, 0, -halfHeight);
+    ctx.lineTo(-this.size, -halfHeight * 0.5);
+    ctx.lineTo(-this.size, halfHeight * 0.5);
+    ctx.lineTo(0, halfHeight);
+    ctx.quadraticCurveTo(this.size * 0.5, halfHeight * 1.5, this.size, 0);
+    ctx.fill();
 
-        // 2. Speilvend HELE tegningen hvis fisken svømmer til venstre
-        if (this.dx < 0) {
-            ctx.scale(-1, 1);
-        }
+    // Øye
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.arc(this.size * 0.7, -halfHeight * 0.2, this.size * 0.15, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = 'black';
+    ctx.beginPath();
+    ctx.arc(this.size * 0.7, -halfHeight * 0.2, this.size * 0.08, 0, 2 * Math.PI);
+    ctx.fill();
 
-        // 3. Tegn fisken som om den er ved (0,0) og PEKER TIL HØYRE
-        // Nesen er ved (this.size, 0), Halen er ved (-this.size, 0)
-        
-        ctx.fillStyle = this.color;
-        var halfHeight = this.size / 2; // Høyde på kroppen
-        
-        // Kropp
-        ctx.beginPath();
-        ctx.moveTo(this.size, 0); // Nese (peker mot +X)
-        ctx.quadraticCurveTo(this.size * 0.5, -halfHeight * 1.5, 0, -halfHeight); // Topp kurve
-        ctx.lineTo(-this.size, -halfHeight * 0.5); // Topp hale-punkt
-        ctx.lineTo(-this.size, halfHeight * 0.5); // Bunn hale-punkt
-        ctx.lineTo(0, halfHeight); // Tilbake til kropp
-        ctx.quadraticCurveTo(this.size * 0.5, halfHeight * 1.5, this.size, 0); // Bunn kurve
-        ctx.fill();
+    ctx.restore();
+}
 
-        // Øye
-        ctx.fillStyle = 'white';
-        ctx.beginPath();
-        // Plasser øyet på høyre side (nær nesen)
-        ctx.arc(this.size * 0.7, -halfHeight * 0.2, this.size * 0.15, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.fillStyle = 'black';
-        ctx.beginPath();
-        ctx.arc(this.size * 0.7, -halfHeight * 0.2, this.size * 0.08, 0, 2 * Math.PI);
-        ctx.fill();
+// Oppdateringsmetode for fisk (ES5-stil)
+Fish.prototype.update = function() {
+    if (!canvas) return; 
+    this.x += this.dx;
+    this.y += this.dy;
 
-        ctx.restore();
+    var boundingBoxX = this.size; 
+    if (this.x - boundingBoxX < 0 || this.x + boundingBoxX > canvas.width) {
+        this.dx = -this.dx; // Snu horisontalt
+    }
+    
+    var boundingBoxY = this.size / 2;
+     if (this.y - boundingBoxY < 0 || this.y + boundingBoxY > canvas.height) {
+        this.dy = -this.dy; // Snu vertikalt
     }
 
-    // Oppdater posisjon og håndter kollisjon med vegger
-    // ENDRING: Oppdatert boundingBox til å matche ny 'this.size'
-    update() {
-        if (!canvas) return; 
-        this.x += this.dx;
-        this.y += this.dy;
-
-        // Snu ved vegg (med litt margin)
-        // this.size er nå halve lengden, så boundingBox = this.size
-        var boundingBoxX = this.size; 
-        if (this.x - boundingBoxX < 0 || this.x + boundingBoxX > canvas.width) {
-            this.dx = -this.dx; // Snu horisontalt
-        }
-        
-        // Bounding box for Y (halve høyden)
-        var boundingBoxY = this.size / 2;
-         if (this.y - boundingBoxY < 0 || this.y + boundingBoxY > canvas.height) {
-            this.dy = -this.dy; // Snu vertikalt
-        }
-
-        // "AI": Tilfeldig endre vertikal retning av og til
-        if (Math.random() < 0.01) {
-            this.dy = (Math.random() * 0.5 - 0.25) * this.speed;
-        }
+    // "AI": Tilfeldig endre vertikal retning av og til
+    if (Math.random() < 0.01) {
+        this.dy = (Math.random() * 0.5 - 0.25) * this.speed;
     }
 }
 
 // Fyll akvariet med fisk
 function initAquarium() {
-    // Hent canvas og context her
-    // KORRIGERT: 'canvas' er nå satt av resizeCanvas()
     if (!canvas) {
         canvas = document.getElementById('aquarium-canvas');
         if (!canvas) {
@@ -288,42 +270,40 @@ function initAquarium() {
     }
     ctx = canvas.getContext('2d');
     
-    // Fyll fisketanken
+    // Fyll fisketanken (ENDRET: var i statt let)
     fishTank = [];
-    for (let i = 0; i < fishCount; i++) {
+    for (var i = 0; i < fishCount; i++) {
         fishTank.push(new Fish());
     }
 
-    // NY: Fyll bobletanken
+    // Fyll bobletanken (ENDRET: var i statt let)
     bubbleTank = [];
-    for (let i = 0; i < bubbleCount; i++) {
+    for (var i = 0; i < bubbleCount; i++) {
         bubbleTank.push(new Bubble());
     }
 }
 
 // Animasjonsløkke
 function animateAquarium() {
-    // Sørg for at vi har context
     if (!ctx || !canvas) {
-        requestAnimationFrame(animateAquarium); // Prøv igjen neste frame
-        return;
+        return; // Ikke gjør noe hvis canvas ikke er klart
     }
     
     // Tøm canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // NY: Oppdater og tegn hver boble (tegnes FØR fisken)
-    bubbleTank.forEach(bubble => {
-        bubble.update();
-        bubble.draw();
-    });
+    // Oppdater og tegn hver boble (ES5-kompatibel løkke)
+    for (var i = 0; i < bubbleTank.length; i++) {
+        bubbleTank[i].update();
+        bubbleTank[i].draw();
+    }
 
-    // Oppdater og tegn hver fisk
-    fishTank.forEach(fish => {
-        fish.update();
-        fish.draw();
-    });
-
-    // Be om neste frame
-    requestAnimationFrame(animateAquarium);
+    // Oppdater og tegn hver fisk (ES5-kompatibel løkke)
+    for (var i = 0; i < fishTank.length; i++) {
+        fishTank[i].update();
+        fishTank[i].draw();
+    }
+    
+    // ENDRING: Ikke kall requestAnimationFrame
+    // Løkken kjøres nå av setInterval fra DOMContentLoaded
 }
