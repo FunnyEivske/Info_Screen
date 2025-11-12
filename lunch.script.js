@@ -124,29 +124,44 @@ function oppdaterVaktNavn(dag, time) {
  * Hovedfunksjon som sjekker tiden og oppdaterer skjermen.
  */
 function checkTime() {
-    var now = new Date();
+    var now = new Date(); // Dato-objekt (lokal tid for klienten)
     
-    var hour = now.getHours();
-    var minute = now.getMinutes();
-    var dayOfWeek = now.getDay(); 
+    // --- START: PÅLITELIG TIDSSONE-LOGIKK (ES5-stil) ---
+    
+    // 1. Hent klokkeslett-streng (HH:mm) fra "Europe/Oslo"
+    var osloTimeStr = new Intl.DateTimeFormat('nb-NO', {
+        timeZone: 'Europe/Oslo',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    }).format(now); // F.eks. "11:15" eller "08:05"
 
-    // --- NY KLOKKE-LOGIKK (ES5-stil) ---
-    var h = now.getHours();
-    var m = now.getMinutes();
-    // Legg til ledende null hvis tallet er under 10
-    if (h < 10) { h = '0' + h; }
-    if (m < 10) { m = '0' + m; }
-    var timeString = h + ':' + m;
-    
-    // Hent klokke-elementet
+    // 2. Hent ukedag-streng (navn) fra "Europe/Oslo"
+    // (Vi bruker en-US for å få et standardisert navn vi kan slå opp)
+    var osloDayStr = new Intl.DateTimeFormat('en-US', { 
+        timeZone: 'Europe/Oslo',
+        weekday: 'long' // F.eks. "Wednesday"
+    }).format(now);
+
+    // 3. Konverter strengene til tall for logikken
+    var hour = parseInt(osloTimeStr.substring(0, 2), 10); // F.eks. 11
+    var minute = parseInt(osloTimeStr.substring(3, 5), 10); // F.eks. 15
+    var timeString = osloTimeStr; // "11:15"
+
+    // 4. Konverter ukedag-navn til tall (0=Søndag, 1=Mandag, ...)
+    var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    var dayOfWeek = days.indexOf(osloDayStr); // F.eks. 3 for "Wednesday"
+
+    // --- SLUTT: PÅLITELIG TIDSSONE-LOGIKK ---
+
+
+    // Hent klokke-elementet og oppdater det
     var klokkeEl = document.getElementById('vakt-klokke');
     if (klokkeEl) {
         klokkeEl.innerHTML = timeString;
     }
-    // --- SLUTT PÅ KLOKKE-LOGIKK ---
 
-
-    // Hent DOM-elementer
+    // Hent resten av DOM-elementene
     var messageOverlay = document.getElementById('message-overlay');
     var messageText = document.getElementById('message-text');
     var afterHoursScreen = document.getElementById('after-hours');
@@ -188,15 +203,15 @@ function checkTime() {
         if (backgroundElement) backgroundElement.style.opacity = '0';
         messageOverlay.classList.remove('visible'); 
         vaktBar.style.display = 'none'; 
-        if (klokkeEl) klokkeEl.style.display = 'none'; // NY: Skjul klokke
+        if (klokkeEl) klokkeEl.style.display = 'none'; // Skjul klokke
     } 
     else { // I åpningstiden
         afterHoursScreen.style.display = 'none';
         if (backgroundElement) backgroundElement.style.opacity = '1';
         vaktBar.style.display = 'flex'; 
-        if (klokkeEl) klokkeEl.style.display = 'block'; // NY: Vis klokke
+        if (klokkeEl) klokkeEl.style.display = 'block'; // Vis klokke
 
-        // NY: Oppdater vakt-navnene
+        // Oppdater vakt-navnene
         oppdaterVaktNavn(dayOfWeek, hour);
 
         if (message) {
