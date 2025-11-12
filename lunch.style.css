@@ -10,7 +10,27 @@ body, html {
     overflow: hidden; /* Skjuler scrollbars */
 }
 
-/* --- NY VAKT-BAR --- */
+/* --- NY KLOKKE (øverst høyre) --- */
+#vakt-klokke {
+    position: fixed;
+    top: 10px; /* Samme padding som vakt-bar */
+    right: 20px; /* Samme padding som vakt-bar */
+    z-index: 6; /* Over vakt-bar, under meldinger */
+    
+    background-color: #FACC15; /* Samme gule som titler */
+    color: #000; /* Svart tekst for kontrast */
+    font-weight: 700;
+    font-size: 1.8vw; /* Samme som vakt-titler */
+    
+    padding: 5px 15px;
+    border-radius: 5px;
+    
+    /* Skjules som standard, vises av JS */
+    display: none; 
+}
+
+
+/* --- VAKT-BAR --- */
 #vakt-bar {
     position: fixed;
     top: 0;

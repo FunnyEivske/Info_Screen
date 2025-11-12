@@ -1,47 +1,50 @@
-    <!DOCTYPE html>
-    <html lang="no">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Lunsj</title>
-        
-        <!-- 1. Import Inter font from Google Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
-        
-        <!-- 2. Link til den separate CSS-filen -->
-        <link rel="stylesheet" href="lunch.style.css">
-    </head>
-    <body>
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunsj</title>
+    
+    <!-- 1. Import Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- 2. Link til den separate CSS-filen -->
+    <link rel="stylesheet" href="lunch.style.css">
+</head>
+<body>
 
-        <!-- NY VAKT-BAR -->
-        <div id="vakt-bar">
-            <div class="vakt-seksjon">
-                <h3>Skranke</h3>
-                <p id="skranke-vakt-navn">-</p>
-            </div>
-            <div class="vakt-seksjon">
-                <h3>Backoffice</h3>
-                <p id="backoffice-vakt-navn">-</p>
-            </div>
+    <!-- NY KLOKKE -->
+    <div id="vakt-klokke">--:--</div>
+
+    <!-- VAKT-BAR -->
+    <div id="vakt-bar">
+        <div class="vakt-seksjon">
+            <h3>Skranke</h3>
+            <p id="skranke-vakt-navn">-</p>
         </div>
-
-        <!-- 1. Akvarium-bakgrunn -->
-        <canvas id="aquarium-canvas"></canvas>
-
-        <!-- 2. Meldings-overlay -->
-        <div id="message-overlay">
-            <span id="message-text"></span>
+        <div class="vakt-seksjon">
+            <h3>Backoffice</h3>
+            <p id="backoffice-vakt-navn">-</p>
         </div>
+    </div>
 
-        <!-- 3. "Etter stengetid"-skjerm -->
-        <div id="after-hours">
-            <img id="uia-logo" src="https://file.garden/Z-PhMwF-KmRdflZZ/Uia/uia-horisontal-med-navn-positiv.png" alt="Universitetet i Agder Logo">
-        </div>
+    <!-- 1. Akvarium-bakgrunn -->
+    <canvas id="aquarium-canvas"></canvas>
 
-        <!-- 5. Link til den separate JavaScript-filen -->
-        <script src="lunch.script.js" defer></script>
+    <!-- 2. Meldings-overlay -->
+    <div id="message-overlay">
+        <span id="message-text"></span>
+    </div>
 
-    </body>
-    </html>
+    <!-- 3. "Etter stengetid"-skjerm -->
+    <div id="after-hours">
+        <img id="uia-logo" src="https://file.garden/Z-PhMwF-KmRdflZZ/Uia/uia-horisontal-med-navn-positiv.png" alt="Universitetet i Agder Logo">
+    </div>
+
+    <!-- 5. Link til den separate JavaScript-filen -->
+    <script src="lunch.script.js" defer></script>
+
+</body>
+</html>

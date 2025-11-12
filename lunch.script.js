@@ -3,6 +3,7 @@
 
 // --- NY VAKTPLAN ---
 // (Basert på bilde, ignorerer LCM, slår sammen Tlf/Kontor/Sentralbord/Post til Backoffice)
+// ENDRING: Fjernet "KRS" fra listene
 var vaktPlan = {
     // 0: Søndag
     0: {
@@ -13,11 +14,11 @@ var vaktPlan = {
     1: {
         formiddag: { // 08:00 - 12:00
             skranke: ["Mathilde", "AC", "Olai"],
-            backoffice: ["Jonny", "Audun", "KRS"]
+            backoffice: ["Jonny", "Audun"] // Fjernet KRS
         },
         ettermiddag: { // 12:00 - 15:30
             skranke: ["Mathilde", "AC", "Audun"],
-            backoffice: ["Jonny", "Olai", "KRS"]
+            backoffice: ["Jonny", "Olai"] // Fjernet KRS
         }
     },
     // 2: Tirsdag
@@ -35,11 +36,11 @@ var vaktPlan = {
     3: {
         formiddag: {
             skranke: ["Jonny", "Audun"],
-            backoffice: ["Mathilde", "Olai", "AC", "KRS"]
+            backoffice: ["Mathilde", "Olai", "AC"] // Fjernet KRS
         },
         ettermiddag: {
             skranke: ["Mathilde", "Olai"],
-            backoffice: ["Jonny", "AC", "KRS", "Olai"]
+            backoffice: ["Jonny", "AC", "Olai"] // Fjernet KRS
         }
     },
     // 4: Torsdag
@@ -129,12 +130,28 @@ function checkTime() {
     var minute = now.getMinutes();
     var dayOfWeek = now.getDay(); 
 
+    // --- NY KLOKKE-LOGIKK (ES5-stil) ---
+    var h = now.getHours();
+    var m = now.getMinutes();
+    // Legg til ledende null hvis tallet er under 10
+    if (h < 10) { h = '0' + h; }
+    if (m < 10) { m = '0' + m; }
+    var timeString = h + ':' + m;
+    
+    // Hent klokke-elementet
+    var klokkeEl = document.getElementById('vakt-klokke');
+    if (klokkeEl) {
+        klokkeEl.innerHTML = timeString;
+    }
+    // --- SLUTT PÅ KLOKKE-LOGIKK ---
+
+
     // Hent DOM-elementer
     var messageOverlay = document.getElementById('message-overlay');
     var messageText = document.getElementById('message-text');
     var afterHoursScreen = document.getElementById('after-hours');
     var backgroundElement = document.getElementById('aquarium-canvas');
-    var vaktBar = document.getElementById('vakt-bar'); // NYTT element
+    var vaktBar = document.getElementById('vakt-bar'); 
 
     var todaySchedule = lunchSchedule[dayOfWeek] || lunchSchedule[0]; 
     var message = ""; 
@@ -170,12 +187,14 @@ function checkTime() {
         afterHoursScreen.style.display = 'flex';
         if (backgroundElement) backgroundElement.style.opacity = '0';
         messageOverlay.classList.remove('visible'); 
-        vaktBar.style.display = 'none'; // NY: Skjul vakt-bar
+        vaktBar.style.display = 'none'; 
+        if (klokkeEl) klokkeEl.style.display = 'none'; // NY: Skjul klokke
     } 
     else { // I åpningstiden
         afterHoursScreen.style.display = 'none';
         if (backgroundElement) backgroundElement.style.opacity = '1';
-        vaktBar.style.display = 'flex'; // NY: Vis vakt-bar
+        vaktBar.style.display = 'flex'; 
+        if (klokkeEl) klokkeEl.style.display = 'block'; // NY: Vis klokke
 
         // NY: Oppdater vakt-navnene
         oppdaterVaktNavn(dayOfWeek, hour);
