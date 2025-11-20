@@ -58,14 +58,13 @@
 
 
 /* =========================================
-   1. SOL / PENT VÆR (Globalt Varmt Filter)
-   - Ingen sirkler eller stråler som dekker tekst.
-   - Farger hele skjermen i en svak, varm tone.
+   1. SOL / PENT VÆR (EXTRA STRONG for TV)
 ========================================= */
 .weather-sun {
     opacity: 1 !important;
-    background: transparent;
-    /* Selve containeren er transparent */
+    /* En kraftig, varm base-glød i hjørnet */
+    background: radial-gradient(circle at 100% 0%, rgba(255, 160, 0, 0.5) 0%, transparent 70%);
+    mix-blend-mode: screen;
 }
 
 .weather-sun::before {
@@ -76,28 +75,26 @@
     width: 100%;
     height: 100%;
 
-    /* En gigantisk, myk gradient som dekker hele skjermen.
-       Starter i toppen til høyre (varm gul/oransje) og fader ut mot bunnen til venstre.
-       Veldig lav opacity (0.1 til 0.2) for å ikke ødelegge kontrasten.
+    /* Gigantisk, myk gradient.
+       Har økt styrken (alpha) kraftig fra 0.2 til 0.6/0.4
+       for at det skal synes på TV-skjermer med lav lysstyrke.
     */
     background: linear-gradient(225deg,
-            /* Diagonalt fra øverst høyre */
-            rgba(255, 220, 100, 0.2) 0%,
-            /* Varmt lys i hjørnet */
-            rgba(255, 180, 50, 0.1) 30%,
-            /* Svakere oransje utover */
-            transparent 80%);
+            rgba(255, 220, 100, 0.7) 0%,
+            /* Veldig sterkt gult lys i hjørnet */
+            rgba(255, 180, 50, 0.4) 40%,
+            /* Oransje glød utover */
+            transparent 100%);
 
-    /* 'screen' gjør at det lyse legger seg oppå det mørke uten å gjøre det grått */
     mix-blend-mode: screen;
 
-    /* Sakte pulsing av lysstyrken */
-    animation: sun-atmosphere 10s ease-in-out infinite alternate;
+    /* Pulserer mellom sterkt og veldig sterkt */
+    animation: sun-atmosphere 8s ease-in-out infinite alternate;
 }
 
 @keyframes sun-atmosphere {
     0% {
-        opacity: 0.6;
+        opacity: 0.7;
     }
 
     100% {
