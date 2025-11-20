@@ -14,7 +14,7 @@
     overflow: hidden;
 }
 
-/* --- Debug Panel Styling --- */
+/* --- Debug Panel Styling (Skjult som standard) --- */
 #weather-debug-panel {
     position: fixed;
     bottom: 20px;
@@ -28,8 +28,6 @@
     pointer-events: auto;
     font-family: sans-serif;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-
-    /* ENDRET: Skjult som standard */
     display: none;
 }
 
@@ -60,14 +58,16 @@
 
 
 /* =========================================
-   1. SOL / PENT VÆR
+   1. SOL / PENT VÆR (Forenklet)
 ========================================= */
 .weather-sun {
     opacity: 1 !important;
+    /* Varm glød i hjørnet */
     background: radial-gradient(circle at 100% 0%, rgba(255, 220, 100, 0.2) 0%, transparent 60%);
     mix-blend-mode: screen;
 }
 
+/* God Rays - Enklere kode og myk fading */
 .weather-sun::before {
     content: "";
     position: absolute;
@@ -75,53 +75,26 @@
     left: -50%;
     width: 200%;
     height: 200%;
+    /* Enklere gradient: Transparent -> Svak Hvit -> Transparent */
     background: repeating-conic-gradient(from 200deg at 100% 0%,
-            rgba(255, 255, 255, 0.0) 0deg,
-            rgba(255, 255, 255, 0.0) 3deg,
-            rgba(255, 255, 255, 0.15) 5deg,
-            rgba(255, 255, 255, 0.0) 7deg);
-    animation: ray-blink 6s ease-in-out infinite alternate;
+            transparent 0deg,
+            rgba(255, 255, 255, 0.08) 10deg,
+            transparent 20deg);
+    /* Rolig pulsing som fader inn og ut */
+    animation: sun-pulse 8s ease-in-out infinite alternate;
 }
 
-.weather-sun::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image:
-        radial-gradient(white, rgba(255, 255, 255, .4) 1px, transparent 2px),
-        radial-gradient(white, rgba(255, 255, 255, .2) 1px, transparent 3px);
-    background-size: 400px 400px, 150px 150px;
-    background-position: 0 0, 30px 60px;
-    opacity: 0.6;
-    animation: glitter 4s ease-in-out infinite alternate;
-}
+/* Glitter (::after) er fjernet */
 
-@keyframes ray-blink {
+@keyframes sun-pulse {
     0% {
-        opacity: 0.3;
+        opacity: 0.2;
         transform: scale(1);
     }
 
-    50% {
-        opacity: 0.6;
-    }
-
     100% {
-        opacity: 0.4;
+        opacity: 0.5;
         transform: scale(1.02);
-    }
-}
-
-@keyframes glitter {
-    0% {
-        opacity: 0.2;
-    }
-
-    100% {
-        opacity: 0.8;
     }
 }
 
