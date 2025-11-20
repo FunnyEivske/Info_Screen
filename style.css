@@ -1,3 +1,5 @@
+@import url('weather-effects.css');
+
 /* --- Globale stiler og CSS Reset --- */
 * {
     box-sizing: border-box;
@@ -7,85 +9,115 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #111827; /* bg-gray-900 */
-    color: #F3F4F6; /* text-gray-100 */
-    padding: 1rem; /* p-4 */
+    background-color: #111827;
+    /* bg-gray-900 */
+    color: #F3F4F6;
+    /* text-gray-100 */
+    padding: 1rem;
+    /* p-4 */
     min-height: 100vh;
-    
+
     /* --- ENDRING: Byttet fra flex til grid --- */
     display: grid;
     /* 1fr = all tilgjengelig plass, auto = kun plassen den trenger */
-    grid-template-rows: 1fr auto; 
+    grid-template-rows: 1fr auto;
     /* flex-direction: column; (Fjernet) */
 }
 
 /* Responsiv padding fra body */
-@media (min-width: 768px) { 
-    body { padding: 1.5rem; } /* md:p-6 */
+@media (min-width: 768px) {
+    body {
+        padding: 1.5rem;
+    }
+
+    /* md:p-6 */
 }
-@media (min-width: 1024px) { 
-    body { padding: 2rem; } /* lg:p-8 */
+
+@media (min-width: 1024px) {
+    body {
+        padding: 2rem;
+    }
+
+    /* lg:p-8 */
 }
 
 /* --- Hoved-layout (Grid) --- */
 .main-grid-container {
     /* flex-grow: 1; (Fjernet) */
-    height: 100%; /* NY: Fyll den nye grid-raden */
-    min-height: 0; /* NY: Trikse-fiks for eldre nettlesere */
+    height: 100%;
+    /* NY: Fyll den nye grid-raden */
+    min-height: 0;
+    /* NY: Trikse-fiks for eldre nettlesere */
 
     width: 100%;
     /* Fjernet max-width, margin-left, margin-right for å la den fylle skjermen */
     display: grid;
-    grid-template-columns: 1fr; /* grid-cols-1 */
-    gap: 1.5rem; /* gap-6 */
+    grid-template-columns: 1fr;
+    /* grid-cols-1 */
+    gap: 1.5rem;
+    /* gap-6 */
 }
 
 /* 5-kolonners grid på medium skjermer og oppover */
 @media (min-width: 768px) {
     .main-grid-container {
-        grid-template-columns: repeat(5, 1fr); /* md:grid-cols-5 */
+        grid-template-columns: repeat(5, 1fr);
+        /* md:grid-cols-5 */
     }
 }
+
 @media (min-width: 1024px) {
     .main-grid-container {
-        gap: 2rem; /* lg:gap-8 */
+        gap: 2rem;
+        /* lg:gap-8 */
     }
 }
 
 /* --- Kort (brukt for buss-kolonner) --- */
 .card {
-    background-color: rgba(31, 41, 55, 0.5); /* bg-gray-800/50 */
-    padding: 1rem; /* p-4 */
-    border-radius: 0.5rem; /* rounded-lg */
+    background-color: rgba(31, 41, 55, 0.5);
+    /* bg-gray-800/50 */
+    padding: 1rem;
+    /* p-4 */
+    border-radius: 0.5rem;
+    /* rounded-lg */
     display: flex;
     flex-direction: column;
-    height: 100%; /* NY: Sørger for at kortet fyller grid-cellen sin */
+    height: 100%;
+    /* NY: Sørger for at kortet fyller grid-cellen sin */
 }
 
 .card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 0.5rem; /* pb-2 */
-    border-bottom: 1px solid #374151; /* border-gray-700 */
+    padding-bottom: 0.5rem;
+    /* pb-2 */
+    border-bottom: 1px solid #374151;
+    /* border-gray-700 */
 }
 
 .card-title {
-    font-size: 1.5rem; /* text-2xl */
+    font-size: 1.5rem;
+    /* text-2xl */
     line-height: 2rem;
-    font-weight: 700; /* font-bold */
-    color: #FACC15; /* text-yellow-400 */
+    font-weight: 700;
+    /* font-bold */
+    color: #FACC15;
+    /* text-yellow-400 */
 }
 
 /* --- Buss-kolonner (layout) --- */
 @media (min-width: 768px) {
     .bus-column {
-        grid-column: span 2 / span 2; /* md:col-span-2 */
+        grid-column: span 2 / span 2;
+        /* md:col-span-2 */
     }
 }
 
 .iframe-container {
-    margin-top: 1rem; /* mt-4 */
+    margin-top: 1rem;
+    /* mt-4 */
     flex-grow: 1;
 }
 
@@ -93,19 +125,30 @@ body {
     width: 100%;
     height: 100%;
     border: 0;
-    border-radius: 0.5rem; /* rounded-lg */
+    border-radius: 0.5rem;
+    /* rounded-lg */
     /* Fjernet min-height: 500px; for å la den fylle plassen vertikalt */
 }
 
 /* --- Klokke --- */
-#clock-1, #clock-2, .clock-box { /* La til .clock-box for backup */
-    font-size: 1.5rem; /* text-2xl */
-    font-weight: 700; /* font-bold */
-    background-color: #FACC15; /* bg-yellow-400 */
-    color: #000000; /* text-black */
-    padding: 0.25rem 0.75rem; /* px-3 py-1 */
-    border-radius: 0.25rem; /* rounded */
-    width: 6rem; /* w-24 */
+#clock-1,
+#clock-2,
+.clock-box {
+    /* La til .clock-box for backup */
+    font-size: 1.5rem;
+    /* text-2xl */
+    font-weight: 700;
+    /* font-bold */
+    background-color: #FACC15;
+    /* bg-yellow-400 */
+    color: #000000;
+    /* text-black */
+    padding: 0.25rem 0.75rem;
+    /* px-3 py-1 */
+    border-radius: 0.25rem;
+    /* rounded */
+    width: 6rem;
+    /* w-24 */
     text-align: center;
 }
 
@@ -115,55 +158,82 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 2rem; /* gap-8 */
-    height: 100%; /* NY: Sørger for at kolonnen fyller grid-cellen sin */
+    gap: 2rem;
+    /* gap-8 */
+    height: 100%;
+    /* NY: Sørger for at kolonnen fyller grid-cellen sin */
 }
 
 /* Setter kolonnebredde på medium skjermer */
 @media (min-width: 768px) {
     .weather-column {
-        grid-column: span 1 / span 1; /* md:col-span-1 */
+        grid-column: span 1 / span 1;
+        /* md:col-span-1 */
     }
 }
 
 .weather-block {
     text-align: center;
 }
+
 /* space-y-6 */
-.weather-block > div { 
+.weather-block>div {
     margin-top: 1.5rem;
 }
-.weather-block > div:first-child {
+
+.weather-block>div:first-child {
     margin-top: 0;
 }
 
 .weather-city {
-    font-size: 1.875rem; /* text-3xl */
+    font-size: 1.875rem;
+    /* text-3xl */
     line-height: 2.25rem;
-    font-weight: 600; /* font-semibold */
+    font-weight: 600;
+    /* font-semibold */
 }
 
-#temp-grimstad, #temp-kristiansand, #temp-arendal, .weather-temp { /* La til .weather-temp for backup */
-    font-size: 4.5rem; /* text-7xl */
+#temp-grimstad,
+#temp-kristiansand,
+#temp-arendal,
+.weather-temp {
+    font-size: 4.5rem;
+    /* text-7xl */
     line-height: 1;
-    font-weight: 700; /* ENDRET: Fra 300 (light) til 700 (bold) */
-    color: #F87171; /* text-red-400 */
+    font-weight: 700;
+    /* font-bold */
+    color: #F87171;
+    /* text-red-400 */
+}
+
+.weather-temp-cold {
+    color: #22D3EE !important;
+    /* text-cyan-400 */
 }
 
 /* --- Logg-boks --- */
 #log-box {
     width: 100%;
-    max-width: 24rem; /* max-w-sm */
-    background-color: #1F2937; /* bg-gray-800 */
-    padding: 1rem; /* p-4 */
-    border-radius: 0.5rem; /* rounded-lg */
-    font-family: monospace; /* font-mono */
-    font-size: 0.75rem; /* text-xs */
+    max-width: 24rem;
+    /* max-w-sm */
+    background-color: #1F2937;
+    /* bg-gray-800 */
+    padding: 1rem;
+    /* p-4 */
+    border-radius: 0.5rem;
+    /* rounded-lg */
+    font-family: monospace;
+    /* font-mono */
+    font-size: 0.75rem;
+    /* text-xs */
     line-height: 1rem;
-    color: #9CA3AF; /* text-gray-400 */
-    height: 6rem; /* h-24 */
+    color: #9CA3AF;
+    /* text-gray-400 */
+    height: 6rem;
+    /* h-24 */
     overflow-y: auto;
 }
+
 #log-box p {
     margin: 0;
 }
@@ -172,70 +242,98 @@ body {
 .ticker-wrapper {
     width: 100%;
     /* Fjernet max-width, margin-left, margin-right for å la den fylle skjermen */
-    margin-top: 1.5rem; /* mt-6 */
+    margin-top: 1.5rem;
+    /* mt-6 */
 }
+
 @media (min-width: 1024px) {
     .ticker-wrapper {
-        margin-top: 2rem; /* lg:mt-8 */
+        margin-top: 2rem;
+        /* lg:mt-8 */
     }
 }
 
 .ticker-bar {
-    background-color: #1F2937; /* bg-gray-800 */
-    padding: 1.25rem; /* p-5 (var p-3) */
-    border-radius: 0.5rem; /* rounded-lg */
+    background-color: #1F2937;
+    /* bg-gray-800 */
+    padding: 1.25rem;
+    /* p-5 (var p-3) */
+    border-radius: 0.5rem;
+    /* rounded-lg */
     display: flex;
     align-items: center;
     /* ENDRING: Økt avstand fra 1.5rem til 2.5rem for å gi mer plass */
-    gap: 2.5rem; 
+    gap: 2.5rem;
 }
 
 .tag {
-    color: #FFFFFF; /* text-white */
-    font-weight: 700; /* font-bold */
-    padding: 0.75rem; /* p-3 (var p-2) */
-    border-radius: 0.25rem; /* rounded */
-    flex-shrink: 0; /* Forhindrer at tag-en krymper */
-    font-size: 1.125rem; /* text-lg (NY) */
+    color: #FFFFFF;
+    /* text-white */
+    font-weight: 700;
+    /* font-bold */
+    padding: 0.75rem;
+    /* p-3 (var p-2) */
+    border-radius: 0.25rem;
+    /* rounded */
+    flex-shrink: 0;
+    /* Forhindrer at tag-en krymper */
+    font-size: 1.125rem;
+    /* text-lg (NY) */
 }
 
 .nrk-tag {
-    background-color: #2563EB; /* bg-blue-600 */
-    padding-left: 0.75rem; /* px-3 */
+    background-color: #2563EB;
+    /* bg-blue-600 */
+    padding-left: 0.75rem;
+    /* px-3 */
     padding-right: 0.75rem;
 }
 
 #nrk-headline {
     flex-grow: 1;
-    color: #D1D5DB; /* text-gray-300 */
-    white-space: nowrap; /* truncate */
+    color: #D1D5DB;
+    /* text-gray-300 */
+    white-space: nowrap;
+    /* truncate */
     overflow: hidden;
     text-overflow: ellipsis;
-    margin: 0; /* Fjerner <p> margin */
-    font-size: 1.25rem; /* text-xl (NY) */
+    margin: 0;
+    /* Fjerner <p> margin */
+    font-size: 1.25rem;
+    /* text-xl (NY) */
     padding: 1.05rem;
 }
 
 .yr-tag {
-    background-color: #06B6D4; /* bg-cyan-500 */
-    height: 3rem; /* h-12 (var h-10) */
-    width: 3rem; /* w-12 (var w-10) */
+    background-color: #06B6D4;
+    /* bg-cyan-500 */
+    height: 3rem;
+    /* h-12 (var h-10) */
+    width: 3rem;
+    /* w-12 (var w-10) */
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 9999px; /* rounded-full */
-    font-size: 1.25rem; /* text-xl (var text-lg) */
+    border-radius: 9999px;
+    /* rounded-full */
+    font-size: 1.25rem;
+    /* text-xl (var text-lg) */
     line-height: 1.75rem;
 }
 
 /* --- Footer --- */
 .footer {
     text-align: center;
-    color: #6B7280; /* text-gray-500 */
-    font-size: 0.875rem; /* text-sm */
+    color: #6B7280;
+    /* text-gray-500 */
+    font-size: 0.875rem;
+    /* text-sm */
     line-height: 1.25rem;
-    margin-top: 0.75rem; /* mt-3 */
+    margin-top: 0.75rem;
+    /* mt-3 */
 }
-.footer span { /* text-red-500 */
+
+.footer span {
+    /* text-red-500 */
     color: #EF4444;
 }

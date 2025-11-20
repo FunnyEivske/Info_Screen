@@ -1,27 +1,32 @@
 <!DOCTYPE html>
 <html lang="no">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buss & Vær Dashboard</title>
-    
+
     <!-- 1. Import Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <!-- 2. Import Inter font from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- 3. Link to our external stylesheet (No Tailwind) -->
     <link rel="stylesheet" href="style.css">
 
 </head>
+
 <body>
+
+    <!-- Weather Overlay -->
+    <div id="weather-overlay"></div>
 
     <!-- Main Content Grid -->
     <div class="main-grid-container">
-        
+
         <!-- Column 1: Universitetet -->
         <div class="card bus-column">
             <!-- Header -->
@@ -31,11 +36,9 @@
             </div>
             <!-- Schedule List (Iframe) -->
             <div class="iframe-container">
-                <iframe 
-                    src="https://skilt.akt.no/Tmix.Cap.DigSig.Gui/App/Rtpi.aspx?numberOfRows=20&stopPointIds=9040029,9040030" 
-                    class="bus-iframe"
-                    title="Universitetet Departures"
-                ></iframe>
+                <iframe
+                    src="https://skilt.akt.no/Tmix.Cap.DigSig.Gui/App/Rtpi.aspx?numberOfRows=20&stopPointIds=9040029,9040030"
+                    class="bus-iframe" title="Universitetet Departures"></iframe>
             </div>
         </div>
 
@@ -55,6 +58,10 @@
                     <div class="weather-city">Arendal</div>
                     <div id="temp-arendal" class="weather-temp">…</div>
                 </div>
+                <div>
+                    <div class="weather-city">Høvåg</div>
+                    <div id="temp-hovag" class="weather-temp">…</div>
+                </div>
             </div>
             <!-- Logs -->
             <div id="log-box">
@@ -71,11 +78,9 @@
             </div>
             <!-- Schedule List (Iframe) -->
             <div class="iframe-container">
-                <iframe 
-                    src="https://skilt.akt.no/Tmix.Cap.DigSig.Gui/App/Rtpi.aspx?numberOfRows=20&stopPointIds=9040031,9040032" 
-                    class="bus-iframe"
-                    title="Avganger Departures"
-                ></iframe>
+                <iframe
+                    src="https://skilt.akt.no/Tmix.Cap.DigSig.Gui/App/Rtpi.aspx?numberOfRows=20&stopPointIds=9040031,9040032"
+                    class="bus-iframe" title="Avganger Departures"></iframe>
             </div>
         </div>
 
@@ -98,4 +103,5 @@
     <script src="script.js" defer></script>
 
 </body>
+
 </html>

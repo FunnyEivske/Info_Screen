@@ -1,0 +1,77 @@
+/* --- Weather Overlay Container --- */
+#weather-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    /* Let clicks pass through */
+    z-index: 9999;
+    /* On top of everything */
+    opacity: 0;
+    transition: opacity 2s ease-in-out;
+    mix-blend-mode: overlay;
+    /* Blends nicely with background */
+}
+
+/* --- Weather States --- */
+
+/* 1. Sun / Clear Sky */
+.weather-sun {
+    opacity: 0.6 !important;
+    background: radial-gradient(circle at 80% 20%, rgba(255, 223, 128, 0.8) 0%, rgba(255, 255, 255, 0) 60%);
+    box-shadow: inset 0 0 100px rgba(255, 200, 0, 0.3);
+    animation: sun-pulse 5s infinite alternate;
+}
+
+@keyframes sun-pulse {
+    0% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+/* 2. Rain */
+.weather-rain {
+    opacity: 0.5 !important;
+    background: linear-gradient(to bottom, rgba(0, 0, 50, 0.2), rgba(0, 0, 100, 0.4));
+    /* Simple rain effect using a repeating gradient could be added here if needed */
+}
+
+/* 3. Snow */
+.weather-snow {
+    opacity: 0.6 !important;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 10%, transparent 10%);
+    background-size: 20px 20px;
+    animation: snow-fall 10s linear infinite;
+}
+
+@keyframes snow-fall {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 0 100vh;
+    }
+}
+
+/* 4. Fog */
+.weather-fog {
+    opacity: 0.8 !important;
+    background: radial-gradient(circle, transparent 40%, rgba(200, 200, 200, 0.8) 100%);
+    backdrop-filter: blur(5px);
+    /* Blurs the content behind */
+}
+
+/* 5. Clouds */
+.weather-cloud {
+    opacity: 0.4 !important;
+    background: linear-gradient(to bottom, rgba(100, 100, 100, 0.3), transparent);
+}
