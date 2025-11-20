@@ -58,12 +58,12 @@
 
 
 /* =========================================
-   1. SOL / PENT VÆR (EXTRA STRONG for TV)
+   1. SOL / PENT VÆR (35% Styrke)
 ========================================= */
 .weather-sun {
     opacity: 1 !important;
-    /* En kraftig, varm base-glød i hjørnet */
-    background: radial-gradient(circle at 100% 0%, rgba(255, 160, 0, 0.5) 0%, transparent 70%);
+    /* Base-glød: Nedjustert til ca 20% for bakgrunnen */
+    background: radial-gradient(circle at 100% 0%, rgba(255, 160, 0, 0.2) 0%, transparent 70%);
     mix-blend-mode: screen;
 }
 
@@ -76,25 +76,24 @@
     height: 100%;
 
     /* Gigantisk, myk gradient.
-       Har økt styrken (alpha) kraftig fra 0.2 til 0.6/0.4
-       for at det skal synes på TV-skjermer med lav lysstyrke.
+       Nedjustert til 0.35 (35%) i toppen og fader ut.
     */
     background: linear-gradient(225deg,
-            rgba(255, 220, 100, 0.7) 0%,
-            /* Veldig sterkt gult lys i hjørnet */
-            rgba(255, 180, 50, 0.4) 40%,
-            /* Oransje glød utover */
+            rgba(255, 220, 100, 0.35) 0%,
+            /* 35% gult lys i hjørnet */
+            rgba(255, 180, 50, 0.2) 40%,
+            /* 20% oransje glød utover */
             transparent 100%);
 
     mix-blend-mode: screen;
 
-    /* Pulserer mellom sterkt og veldig sterkt */
+    /* Pulserer rolig mellom 80% og 100% av 35%-styrken */
     animation: sun-atmosphere 8s ease-in-out infinite alternate;
 }
 
 @keyframes sun-atmosphere {
     0% {
-        opacity: 0.7;
+        opacity: 0.8;
     }
 
     100% {
