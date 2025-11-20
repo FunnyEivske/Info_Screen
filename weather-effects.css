@@ -58,16 +58,17 @@
 
 
 /* =========================================
-   1. SOL / PENT VÆR (Forenklet)
+   1. SOL / PENT VÆR (TV-Safe versjon)
+   - Bruker lineære gradienter i stedet for koniske
 ========================================= */
 .weather-sun {
     opacity: 1 !important;
-    /* Varm glød i hjørnet */
-    background: radial-gradient(circle at 100% 0%, rgba(255, 220, 100, 0.2) 0%, transparent 60%);
+    /* Enkel, varm glød i hjørnet (Radial gradient støttes bra av de fleste) */
+    background: radial-gradient(circle at 100% 0%, rgba(255, 220, 100, 0.3) 0%, transparent 60%);
     mix-blend-mode: screen;
 }
 
-/* God Rays - Enklere kode og myk fading */
+/* God Rays - Diagonale striper i stedet for roterende kjegle */
 .weather-sun::before {
     content: "";
     position: absolute;
@@ -75,26 +76,30 @@
     left: -50%;
     width: 200%;
     height: 200%;
-    /* Enklere gradient: Transparent -> Svak Hvit -> Transparent */
-    background: repeating-conic-gradient(from 200deg at 100% 0%,
-            transparent 0deg,
-            rgba(255, 255, 255, 0.08) 10deg,
-            transparent 20deg);
-    /* Rolig pulsing som fader inn og ut */
+
+    /* Roterer hele laget slik at stripene kommer på skrå fra hjørnet */
+    transform: rotate(-30deg);
+
+    /* Lager myke striper som gjentar seg bortover */
+    background: repeating-linear-gradient(90deg,
+            transparent 0%,
+            transparent 5%,
+            rgba(255, 255, 255, 0.08) 10%,
+            transparent 15%);
+
+    /* Rolig pulsing (fader inn og ut) */
     animation: sun-pulse 8s ease-in-out infinite alternate;
 }
 
-/* Glitter (::after) er fjernet */
+/* Fjernet glitter (::after) som avtalt */
 
 @keyframes sun-pulse {
     0% {
-        opacity: 0.2;
-        transform: scale(1);
+        opacity: 0.3;
     }
 
     100% {
-        opacity: 0.5;
-        transform: scale(1.02);
+        opacity: 0.6;
     }
 }
 
