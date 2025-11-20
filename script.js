@@ -44,12 +44,45 @@ function logStatus(msg) {
     var time = new Date().toLocaleTimeString('nb-NO');
     var newLogEntry = document.createElement('p');
     newLogEntry.textContent = '[' + time + '] - ' + msg;
-    // Add new log to the top
     logBox.prepend(newLogEntry);
-    // Keep log box clean
     while (logBox.children.length > 10) {
         logBox.removeChild(logBox.lastChild);
     }
+}
+
+/**
+ * DEBUG MODE: Creates buttons to manually toggle weather
+ */
+function initDebugMode() {
+    // Sjekk om debug-panel allerede finnes
+    if (document.getElementById('weather-debug-panel')) return;
+
+    var debugDiv = document.createElement('div');
+    debugDiv.id = 'weather-debug-panel';
+    debugDiv.innerHTML = '<h4>Debug Vær</h4>' +
+        '<button onclick="updateWeatherEffects(\'clearsky\')">☀️ Sol</button>' +
+        '<button onclick="updateWeatherEffects(\'snow\')">❄️ Snø</button>' +
+        '<button onclick="updateWeatherEffects(\'fog\')">🌫️ Tåke</button>' +
+        '<button onclick="updateWeatherEffects(\'rain\')">🌧️ Regn</button>' +
+        '<button onclick="updateWeatherEffects(\'cloud\')">☁️ Skyet</button>' +
+        '<button onclick="updateWeatherEffects(\'\')">❌ Nullstill</button>';
+
+    document.body.appendChild(debugDiv);
+
+    // Toggle visning med 'X' tast
+    document.addEventListener('keydown', function (e) {
+        if (e.key.toLowerCase() === 'x') {
+            // Hvis den er tom (fra CSS) eller 'none' -> sett til 'block', ellers 'none'
+            var currentDisplay = window.getComputedStyle(debugDiv).display;
+            if (currentDisplay === 'none') {
+                debugDiv.style.display = 'block';
+            } else {
+                debugDiv.style.display = 'none';
+            }
+        }
+    });
+
+    console.log('🔧 Debug panel lastet. Trykk "X" for å vise/skjule.');
 }
 
 /**
@@ -63,33 +96,42 @@ function updateWeatherEffects(symbolCode) {
         return;
     }
 
-    // Reset classes
+    // Nullstill klasser
     overlay.className = '';
 
-    // Map symbol codes to classes
-    // See https://api.met.no/weatherapi/weathericon/2.0/documentation
     if (!symbolCode) {
-        console.warn('⚠️ Ingen symbolkode mottatt for væreffekt.');
+        console.warn('⚠️ Ingen symbolkode (eller nullstilling).');
+        overlay.style.opacity = 0; // Skjul overlay hvis nullstilt
         return;
     }
 
-    if (symbolCode.indexOf('sun') !== -1 || symbolCode === 'clearsky_day' || symbolCode === 'fair_day') {
+    // --- LOGIKK FOR Å VELGE EFFEKT ---
+    if (symbolCode.indexOf('clearsky') !== -1 || symbolCode.indexOf('fair') !== -1 || symbolCode.indexOf('sun') !== -1) {
         overlay.classList.add('weather-sun');
-    } else if (symbolCode.indexOf('rain') !== -1 || symbolCode.indexOf('sleet') !== -1) {
-        overlay.classList.add('weather-rain');
-    } else if (symbolCode.indexOf('snow') !== -1) {
+        logStatus('Debug: Sol valgt');
+    }
+    else if (symbolCode.indexOf('snow') !== -1 || symbolCode.indexOf('sleet') !== -1) {
         overlay.classList.add('weather-snow');
-    } else if (symbolCode.indexOf('fog') !== -1) {
+        logStatus('Debug: Snø valgt');
+    }
+    else if (symbolCode.indexOf('fog') !== -1) {
         overlay.classList.add('weather-fog');
-    } else if (symbolCode.indexOf('cloud') !== -1 || symbolCode === 'partlycloudy_day' || symbolCode === 'partlycloudy_night') {
-        overlay.classList.add('weather-cloud');
-    } else {
-        console.log('ℹ️ Ingen spesifikk effekt for symbol:', symbolCode);
+        logStatus('Debug: Tåke valgt');
+    }
+    else if (symbolCode.indexOf('rain') !== -1) {
+        overlay.classList.add('weather-rain');
+        logStatus('Debug: Regn valgt');
+    }
+    else if (symbolCode.indexOf('cloud') !== -1 || symbolCode.indexOf('partlycloudy') !== -1) {
+        // ENDRET: Ingen effekt når det er skyet (kun logg)
+        logStatus('Debug: Skyet valgt (Ingen overlay)');
+    }
+    else {
+        console.log('ℹ️ Ukjent symbol, ingen effekt:', symbolCode);
     }
 
-    // Make it visible
+    // Gjør effekten synlig
     overlay.style.opacity = 1;
-    logStatus('🎨 Væreffekt satt til: ' + symbolCode);
 }
 
 /**
@@ -104,8 +146,6 @@ function updateWeather() {
 
         var xhr = new XMLHttpRequest();
         xhr.open('GET', proxyUrl, true);
-        // Add User-Agent to be polite to Met.no
-        // xhr.setRequestHeader('User-Agent', USER_AGENT); 
 
         xhr.onload = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -115,13 +155,12 @@ function updateWeather() {
                     var current = timeseries[0].data.instant.details;
                     var next1h = timeseries[0].data.next_1_hours.summary.symbol_code;
 
-                    // Update temperature
+                    // Update temperature text
                     var tempEl = document.getElementById('temp-' + loc.id);
                     if (tempEl) {
                         var temp = Math.round(current.air_temperature);
                         tempEl.textContent = temp + '°';
 
-                        // Apply color based on temperature
                         if (temp <= 0) {
                             tempEl.classList.add('weather-temp-cold');
                         } else {
@@ -129,7 +168,8 @@ function updateWeather() {
                         }
                     }
 
-                    // Update effects only for the first location (Grimstad)
+                    // --- KUN OPPDATER EFFEKT HVIS VI IKKE DEBUGGER MANUELT ---
+                    // (I praksis vil denne overskrive debug-valg når den kjører hvert 15. minutt)
                     if (index === 0) {
                         updateWeatherEffects(next1h);
                     }
@@ -151,13 +191,10 @@ function updateWeather() {
     });
 }
 
-/**
- * Fetches and parses the NRK RSS feed using XHR
- */
 function fetchNews() {
     logStatus('⏳ Henter NRK-nyheter (RSS)...');
     var proxyUrl = CORS_PROXY_PREFIX + encodeURIComponent(NRK_RSS_URL);
-    var headlineEl = document.getElementById('nrk-headline'); // Get element early
+    var headlineEl = document.getElementById('nrk-headline');
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', proxyUrl, true);
@@ -168,104 +205,65 @@ function fetchNews() {
                 var xmlText = xhr.responseText;
                 var parser = new DOMParser();
                 var xmlDoc = parser.parseFromString(xmlText, "text/xml");
-
                 var items = xmlDoc.querySelectorAll("item");
 
-                if (items.length === 0) {
-                    var parseError = xmlDoc.querySelector("parsererror");
-                    if (parseError) {
-                        throw new Error('XML Parsefeil');
-                    }
-                    throw new Error('Ingen <item> funnet i RSS feed.');
-                }
+                if (items.length === 0) throw new Error('Ingen nyheter');
 
                 var headlines = [];
                 items.forEach(function (item) {
-                    // Manual, safe check (replacement for '?.')
                     var titleEl = item.querySelector("title");
-                    var title = null;
                     if (titleEl) {
-                        title = titleEl.textContent;
-                    }
-
-                    if (title) {
-                        headlines.push(title.replace("<![CDATA[", "").replace("]]>", "").trim());
+                        headlines.push(titleEl.textContent.replace("<![CDATA[", "").replace("]]>", "").trim());
                     }
                 });
 
-                // .filter(Boolean) is ES5.1, should be fine.
                 nrkHeadlines = headlines.slice(0, 10).filter(Boolean);
 
                 if (nrkHeadlines.length > 0) {
-                    logStatus('✅ Nyheter lastet (' + nrkHeadlines.length + ' overskrifter)');
-                    rotateNews(true); // 'true' to reset index
-                } else {
-                    throw new Error('Ingen nyhetsoverskrifter funnet.');
+                    logStatus('✅ Nyheter lastet');
+                    rotateNews(true);
                 }
 
             } catch (e) {
-                logStatus('❌ Parse-feil Nyheter: ' + e.message);
-                if (headlineEl) headlineEl.textContent = 'Kunne ikke laste nyheter.';
+                logStatus('❌ Nyheter feilet: ' + e.message);
             }
-        } else {
-            logStatus('❌ Nyhets-feil: HTTP ' + xhr.status);
-            if (headlineEl) headlineEl.textContent = 'Kunne ikke laste nyheter.';
         }
     };
-
-    xhr.onerror = function () {
-        logStatus('❌ Nyhets-feil: Nettverksfeil');
-        if (headlineEl) headlineEl.textContent = 'Kunne ikke laste nyheter.';
-    };
-
     xhr.send();
 }
 
-/**
- * Rotates the news headline in the ticker.
- */
 function rotateNews(reset) {
     if (nrkHeadlines.length === 0) return;
-
-    if (reset) {
-        currentNewsIndex = 0;
-    }
+    if (reset) currentNewsIndex = 0;
 
     var headlineEl = document.getElementById('nrk-headline');
     if (headlineEl) {
-        // Add a simple fade effect for transition
         headlineEl.style.opacity = 0;
         setTimeout(function () {
-            // Check if headline exists before trying to show it
             if (nrkHeadlines[currentNewsIndex]) {
                 headlineEl.textContent = nrkHeadlines[currentNewsIndex];
             }
             headlineEl.style.opacity = 1;
-        }, 300); // 300ms fade
+        }, 300);
     }
-
-    // Go to next headline
     currentNewsIndex = (currentNewsIndex + 1) % nrkHeadlines.length;
 }
 
-// --- Initial Load and Timers ---
+// --- Initial Load ---
 document.addEventListener('DOMContentLoaded', function () {
-    // Clear initial log
     var logBox = document.getElementById('log-box');
     if (logBox) logBox.innerHTML = '';
 
-    // Run clock (from existing script)
     updateClocks();
-    setInterval(updateClocks, 10000); // Oppdater klokke hvert 10. sek
+    setInterval(updateClocks, 10000);
 
-    // Fetch data immediately on load
+    // Last debug panel
+    initDebugMode();
+
     updateWeather();
     fetchNews();
 
-    // Set intervals to re-fetch data
-    setInterval(updateWeather, 15 * 60 * 1000); // Vær: Hvert 15. min
-    setInterval(fetchNews, 5 * 60 * 1000);   // Nyheter: Hvert 5. min
-
-    // Set interval to rotate news
-    setInterval(rotateNews, 10000); // Roter nyhet hver 10. sekund
+    setInterval(updateWeather, 15 * 60 * 1000);
+    setInterval(fetchNews, 5 * 60 * 1000);
+    setInterval(rotateNews, 10000);
 });
