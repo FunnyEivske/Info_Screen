@@ -14,7 +14,7 @@ function updateClock() {
     const now = new Date();
     const options = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Oslo' };
     const timeString = new Intl.DateTimeFormat('nb-NO', options).format(now);
-    
+
     const clockEl = document.getElementById('clock');
     if (clockEl) clockEl.textContent = timeString;
 }
@@ -29,7 +29,7 @@ function updateWeather() {
         .then(data => {
             const timeseries = data.properties.timeseries;
             const current = timeseries[0];
-            
+
             // 1. Update Current Weather
             updateCurrentWeather(current);
 
@@ -45,13 +45,13 @@ function updateWeather() {
 function updateCurrentWeather(currentData) {
     const temp = Math.round(currentData.data.instant.details.air_temperature);
     const symbolCode = currentData.data.next_1_hours.summary.symbol_code;
-    
+
     const tempEl = document.getElementById('current-temp');
     const iconEl = document.getElementById('current-weather-icon');
     const summaryEl = document.getElementById('current-summary');
 
     tempEl.textContent = `${temp}°`;
-    
+
     // Color logic
     if (temp <= 0) {
         tempEl.classList.add('weather-temp-cold');
@@ -67,7 +67,7 @@ function updateCurrentWeather(currentData) {
     // Actually, let's use a known CDN for weather icons or just the symbol code name for now if image fails.
     // A common way is to download them, but since I can't easily do that, I will use a public URL structure.
     // https://raw.githubusercontent.com/metno/weathericons/master/weather/svg/${symbolCode}.svg
-    
+
     iconEl.src = `https://raw.githubusercontent.com/metno/weathericons/master/weather/svg/${symbolCode}.svg`;
     summaryEl.textContent = translateSymbolCode(symbolCode);
 }
@@ -126,7 +126,7 @@ function translateSymbolCode(code) {
 // --- News ---
 function fetchRSS(url, listId) {
     const proxyUrl = CORS_PROXY_PREFIX + encodeURIComponent(url);
-    
+
     fetch(proxyUrl)
         .then(response => response.text())
         .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
@@ -140,7 +140,7 @@ function fetchRSS(url, listId) {
             items.forEach(item => {
                 if (count >= 10) return;
                 const title = item.querySelector("title").textContent.replace("<![CDATA[", "").replace("]]>", "").trim();
-                
+
                 const li = document.createElement('li');
                 li.textContent = title;
                 listEl.appendChild(li);
@@ -158,6 +158,102 @@ function updateNews() {
     fetchRSS(VG_RSS_URL, 'vg-news-list');
 }
 
+// --- Screensaver & Refresh Logic ---
+let isScreensaverActive = false;
+let manualOverride = false; // true if user manually toggled it
+let animationId = null;
+
+// Bouncing Logic
+let x = 100, y = 100;
+let dx = 2, dy = 2; // Speed
+const logo = document.getElementById('screensaver-logo');
+const container = document.getElementById('screensaver-container');
+
+function startScreensaver() {
+    if (isScreensaverActive) return;
+    isScreensaverActive = true;
+    container.style.display = 'block';
+
+    // Reset position if needed or keep random? Let's keep it simple.
+    // Ensure logo is loaded for dimensions
+    animateScreensaver();
+}
+
+function stopScreensaver() {
+    if (!isScreensaverActive) return;
+    isScreensaverActive = false;
+    container.style.display = 'none';
+    if (animationId) cancelAnimationFrame(animationId);
+}
+
+function animateScreensaver() {
+    if (!isScreensaverActive) return;
+
+    const logoRect = logo.getBoundingClientRect();
+    const winWidth = window.innerWidth;
+    const winHeight = window.innerHeight;
+
+    // Update position
+    x += dx;
+    y += dy;
+
+    // Bounce X
+    if (x + logoRect.width >= winWidth || x <= 0) {
+        dx = -dx;
+        x = Math.max(0, Math.min(x, winWidth - logoRect.width)); // Clamp
+    }
+
+    // Bounce Y
+    if (y + logoRect.height >= winHeight || y <= 0) {
+        dy = -dy;
+        y = Math.max(0, Math.min(y, winHeight - logoRect.height)); // Clamp
+    }
+
+    logo.style.left = x + 'px';
+    logo.style.top = y + 'px';
+
+    animationId = requestAnimationFrame(animateScreensaver);
+}
+
+function checkTimeForScreensaver() {
+    if (manualOverride) return; // Don't auto-change if user manually set it
+
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+
+    // Active between 16:30 and 06:00
+    // >= 16:30 OR < 06:00
+
+    const isAfterStart = (hours > 16) || (hours === 16 && minutes >= 30);
+    const isBeforeEnd = (hours < 6);
+
+    if (isAfterStart || isBeforeEnd) {
+        startScreensaver();
+    } else {
+        stopScreensaver();
+    }
+}
+
+function toggleScreensaver() {
+    manualOverride = true; // User took control
+    if (isScreensaverActive) {
+        stopScreensaver();
+    } else {
+        startScreensaver();
+    }
+}
+
+// Hourly Refresh (Only if screensaver is OFF)
+function checkHourlyRefresh() {
+    if (!isScreensaverActive) {
+        console.log('Refreshing page...');
+        location.reload();
+    } else {
+        console.log('Screensaver active, skipping refresh.');
+    }
+}
+
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
     updateClock();
@@ -168,4 +264,18 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateClock, 10000); // Every 10 sec
     setInterval(updateWeather, 15 * 60 * 1000); // Every 15 min
     setInterval(updateNews, 5 * 60 * 1000); // Every 5 min
+
+    // Screensaver Check (Every minute)
+    checkTimeForScreensaver();
+    setInterval(checkTimeForScreensaver, 60 * 1000);
+
+    // Hourly Refresh
+    setInterval(checkHourlyRefresh, 60 * 60 * 1000);
+
+    // Key Listener
+    document.addEventListener('keydown', (e) => {
+        if (e.key.toLowerCase() === 'v') {
+            toggleScreensaver();
+        }
+    });
 });
