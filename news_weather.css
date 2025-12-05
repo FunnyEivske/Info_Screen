@@ -1,0 +1,211 @@
+/* --- Globale stiler og CSS Reset --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #111827; /* bg-gray-900 */
+    color: #F3F4F6; /* text-gray-100 */
+    padding: 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    body { padding: 2rem; }
+}
+
+/* --- Layout --- */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    flex-grow: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.top-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    flex-grow: 1;
+}
+
+@media (min-width: 1024px) {
+    .top-section {
+        grid-template-columns: 1fr 2fr; /* Weather takes 1/3, News takes 2/3 */
+    }
+}
+
+/* --- Cards --- */
+.weather-card, .news-card {
+    background-color: rgba(31, 41, 55, 0.5); /* bg-gray-800/50 */
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid #374151;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #374151;
+    margin-bottom: 1rem;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #FACC15; /* text-yellow-400 */
+}
+
+/* --- Clock --- */
+.clock-box {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background-color: #FACC15;
+    color: #000000;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+}
+
+/* --- Weather Specifics --- */
+.current-weather {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    gap: 1rem;
+    text-align: center;
+}
+
+.weather-icon-large {
+    width: 150px;
+    height: 150px;
+}
+
+.weather-temp-large {
+    font-size: 6rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #F87171; /* text-red-400 */
+}
+
+.weather-temp-cold {
+    color: #22D3EE !important; /* text-cyan-400 */
+}
+
+.weather-summary {
+    font-size: 1.5rem;
+    color: #9CA3AF;
+}
+
+/* --- News Specifics --- */
+.news-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .news-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.news-badge {
+    color: #FFFFFF;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.nrk-badge { background-color: #2563EB; }
+.vg-badge { background-color: #EF4444; }
+
+.news-list {
+    list-style: none;
+    overflow-y: auto;
+    max-height: 400px; /* Prevent infinite growth */
+}
+
+.news-list li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #374151;
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+.news-list li:last-child {
+    border-bottom: none;
+}
+
+/* --- Bottom Hourly Forecast --- */
+.bottom-section {
+    background-color: rgba(31, 41, 55, 0.5);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    border: 1px solid #374151;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    color: #9CA3AF;
+    margin-bottom: 1rem;
+}
+
+.hourly-scroll {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: #4B5563 transparent;
+}
+
+.forecast-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 80px;
+    gap: 0.5rem;
+}
+
+.forecast-time {
+    font-weight: 600;
+    color: #D1D5DB;
+}
+
+.forecast-icon {
+    width: 50px;
+    height: 50px;
+}
+
+.forecast-temp {
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: #F87171;
+}
+
+/* --- Footer --- */
+.footer {
+    text-align: center;
+    color: #6B7280;
+    font-size: 0.875rem;
+    margin-top: auto;
+}
+
+.footer span {
+    color: #EF4444;
+}

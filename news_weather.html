@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nyheter & Vær Dashboard</title>
+
+    <!-- Import Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Import Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Link to our new external stylesheet -->
+    <link rel="stylesheet" href="news_weather.css">
+
+</head>
+
+<body>
+
+    <!-- Main Content Grid -->
+    <div class="main-container">
+
+        <!-- Top Section: Weather & News -->
+        <div class="top-section">
+            
+            <!-- Left: Grimstad Weather (Current) -->
+            <div class="weather-card">
+                <div class="card-header">
+                    <h2 class="card-title">Været i Grimstad</h2>
+                    <div id="clock" class="clock-box">--:--</div>
+                </div>
+                <div class="current-weather">
+                    <img id="current-weather-icon" src="" alt="Værikon" class="weather-icon-large">
+                    <div id="current-temp" class="weather-temp-large">--°</div>
+                    <div id="current-summary" class="weather-summary">Laster vær...</div>
+                </div>
+            </div>
+
+            <!-- Right: News Feeds -->
+            <div class="news-container">
+                
+                <!-- NRK News -->
+                <div class="news-card nrk-card">
+                    <div class="card-header">
+                        <h2 class="card-title">NRK Nyheter</h2>
+                        <span class="news-badge nrk-badge">NRK</span>
+                    </div>
+                    <ul id="nrk-news-list" class="news-list">
+                        <li>Laster nyheter...</li>
+                    </ul>
+                </div>
+
+                <!-- VG News -->
+                <div class="news-card vg-card">
+                    <div class="card-header">
+                        <h2 class="card-title">VG Nyheter</h2>
+                        <span class="news-badge vg-badge">VG</span>
+                    </div>
+                    <ul id="vg-news-list" class="news-list">
+                        <li>Laster nyheter...</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bottom Section: Hourly Forecast -->
+        <div class="bottom-section">
+            <h3 class="section-title">Time for time</h3>
+            <div id="hourly-forecast" class="hourly-scroll">
+                <!-- Forecast items will be injected here -->
+                <div class="forecast-item">Laster...</div>
+            </div>
+        </div>
+
+        <div class="footer">
+            Made by Anaru with <span>♥</span>
+        </div>
+
+    </div>
+
+    <!-- Link to the external JavaScript file -->
+    <script src="news_weather.js" defer></script>
+
+</body>
+
+</html>
