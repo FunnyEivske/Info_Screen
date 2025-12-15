@@ -6,15 +6,10 @@ function updateClocks() {
     var options = { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Oslo' };
     var timeString = new Intl.DateTimeFormat('nb-NO', options).format(now);
 
-    // Update clock elements
-    var clock1 = document.getElementById('clock-1');
-    var clock2 = document.getElementById('clock-2');
-
-    if (clock1) {
-        clock1.textContent = timeString;
-    }
-    if (clock2) {
-        clock2.textContent = timeString;
+    // Update main clock
+    var clockEl = document.getElementById('clock-main');
+    if (clockEl) {
+        clockEl.textContent = timeString;
     }
 }
 
@@ -26,28 +21,33 @@ var LOCATIONS = [
     { id: 'grimstad', name: 'Grimstad', latitude: 58.33455833890616, longitude: 8.577132411967785 },
     { id: 'kristiansand', name: 'Kristiansand', latitude: 58.16329955371125, longitude: 8.00258786985478 },
     { id: 'arendal', name: 'Arendal', latitude: 58.46086657739493, longitude: 8.764345505384163 },
-    { id: 'hovag', name: 'Høvåg', latitude: 58.403478, longitude: 8.283623 }
+    { id: 'hovag', name: 'Høvåg', latitude: 58.522017, longitude: 8.351285 }
 ];
 var NRK_RSS_URL = 'https://www.nrk.no/nyheter/siste.rss';
+var VG_RSS_URL = 'https://www.vg.no/rss/feed/?categories=1068&keywords=&limit=10&format=rss';
+var ENTUR_GRAPHQL_URL = 'https://api.entur.io/journey-planner/v3/graphql';
 var CORS_PROXY_PREFIX = 'https://corsproxy.io/?';
+
+// Bus Stops (NSR Quays) - Separated by Direction
+// Vest (Kristiansand): 38117 (Line 100), 38108 (Local M2), 38111 (Line 36 Tveit)
+// Øst (Arendal): 38116 (Line 101)
+var BUS_STOPS = [
+    { ids: ['NSR:Quay:38117', 'NSR:Quay:38108', 'NSR:Quay:38111'], elementId: 'bus-departures-1' }, // Mot Kristiansand
+    { ids: ['NSR:Quay:38116'], elementId: 'bus-departures-2' }  // Mot Arendal
+];
 
 // --- Global cache for news ---
 var nrkHeadlines = [];
 var currentNewsIndex = 0;
+var vgHeadlines = [];
+var currentVGIndex = 0;
 
 /**
  * Logs a message to the status box on the page.
+ * (Disabled visual logging as per user request, only console)
  */
 function logStatus(msg) {
-    var logBox = document.getElementById('log-box');
-    if (!logBox) return;
-    var time = new Date().toLocaleTimeString('nb-NO');
-    var newLogEntry = document.createElement('p');
-    newLogEntry.textContent = '[' + time + '] - ' + msg;
-    logBox.prepend(newLogEntry);
-    while (logBox.children.length > 10) {
-        logBox.removeChild(logBox.lastChild);
-    }
+    console.log('[LOG]: ' + msg);
 }
 
 /**
@@ -168,10 +168,18 @@ function updateWeather() {
                         }
                     }
 
+                    // Update weather icon
+                    var iconEl = document.getElementById('icon-' + loc.id);
+                    if (iconEl && next1h) {
+                        // Met.no icons URL
+                        iconEl.src = 'https://raw.githubusercontent.com/metno/weathericons/master/weather/svg/' + next1h + '.svg';
+                        iconEl.style.display = 'inline-block';
+                    }
+
                     // --- KUN OPPDATER EFFEKT HVIS VI IKKE DEBUGGER MANUELT ---
                     // (I praksis vil denne overskrive debug-valg når den kjører hvert 15. minutt)
                     if (index === 0) {
-                        updateWeatherEffects(next1h);
+                        // updateWeatherEffects(next1h);
                     }
 
                 } catch (e) {
@@ -249,6 +257,178 @@ function rotateNews(reset) {
     currentNewsIndex = (currentNewsIndex + 1) % nrkHeadlines.length;
 }
 
+function fetchVGNews() {
+    logStatus('⏳ Henter VG-nyheter (RSS)...');
+    var proxyUrl = CORS_PROXY_PREFIX + encodeURIComponent(VG_RSS_URL);
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', proxyUrl, true);
+
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+                var xmlText = xhr.responseText;
+                var parser = new DOMParser();
+                var xmlDoc = parser.parseFromString(xmlText, "text/xml");
+                var items = xmlDoc.querySelectorAll("item");
+
+                var headlines = [];
+                items.forEach(function (item) {
+                    var titleEl = item.querySelector("title");
+                    if (titleEl) {
+                        headlines.push(titleEl.textContent.replace("<![CDATA[", "").replace("]]>", "").trim());
+                    }
+                });
+
+                vgHeadlines = headlines.slice(0, 10).filter(Boolean);
+
+                if (vgHeadlines.length > 0) {
+                    logStatus('✅ VG lastet');
+                    rotateVGNews(true);
+                }
+            } catch (e) {
+                logStatus('❌ VG feilet: ' + e.message);
+            }
+        }
+    };
+    xhr.send();
+}
+
+function rotateVGNews(reset) {
+    if (vgHeadlines.length === 0) return;
+    if (reset) currentVGIndex = 0;
+
+    var headlineEl = document.getElementById('vg-headline');
+    if (headlineEl) {
+        headlineEl.style.opacity = 0;
+        setTimeout(function () {
+            if (vgHeadlines[currentVGIndex]) {
+                headlineEl.textContent = vgHeadlines[currentVGIndex];
+            }
+            headlineEl.style.opacity = 1;
+        }, 300);
+    }
+    currentVGIndex = (currentVGIndex + 1) % vgHeadlines.length;
+}
+
+/**
+ * Fetches bus departures from Entur API.
+ */
+function fetchBusData() {
+    BUS_STOPS.forEach(function (stop) {
+        // Construct array string like ["NSR:Quay:123", "NSR:Quay:456"]
+        var idsString = JSON.stringify(stop.ids);
+        logStatus('🚌 Henter bussruter...');
+
+        var query = '{ quays(ids: ' + idsString + ') { id estimatedCalls(numberOfDepartures: 20) { expectedArrivalTime realtime destinationDisplay { frontText } serviceJourney { line { publicCode } } } } }';
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', ENTUR_GRAPHQL_URL, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.setRequestHeader('ET-Client-Name', USER_AGENT);
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    var data = response.data;
+
+                    if (data && data.quays) {
+                        // Merge calls from all quays
+                        var allCalls = [];
+                        data.quays.forEach(function (quay) {
+                            if (quay && quay.estimatedCalls) {
+                                allCalls = allCalls.concat(quay.estimatedCalls);
+                            }
+                        });
+
+                        // Sort by arrival time
+                        allCalls.sort(function (a, b) {
+                            return new Date(a.expectedArrivalTime) - new Date(b.expectedArrivalTime);
+                        });
+
+                        // Slice top 14
+                        var nextCalls = allCalls.slice(0, 14);
+
+                        renderBusDepartures(stop.elementId, nextCalls);
+                        logStatus('✅ Bussruter lastet (' + nextCalls.length + ')');
+                    } else {
+                        console.error('Bus data missing structure:', response);
+                        throw new Error('No quays found');
+                    }
+                } catch (e) {
+                    console.error('Bus parse error:', e);
+                    logStatus('❌ Buss-feil: Parse error');
+                }
+            } else {
+                logStatus('❌ Buss-feil: ' + xhr.status);
+            }
+        };
+
+        xhr.onerror = function () {
+            logStatus('❌ Buss-feil: Nettverk');
+        };
+
+        xhr.send(JSON.stringify({ query: query }));
+    });
+}
+
+function renderBusDepartures(elementId, calls) {
+    var container = document.getElementById(elementId);
+    if (!container) return;
+
+    container.innerHTML = ''; // Clear loading/old content
+
+    if (calls.length === 0) {
+        container.innerHTML = '<p style="text-align:center;color:#9ca3af;">Ingen avganger funnet.</p>';
+        return;
+    }
+
+    calls.forEach(function (call) {
+        var lineCode = call.serviceJourney.line.publicCode;
+        var destination = call.destinationDisplay.frontText;
+        var arrivalTime = new Date(call.expectedArrivalTime);
+        var isRealtime = call.realtime;
+
+        // Calculate time diff
+        var now = new Date();
+        var diffMs = arrivalTime - now;
+        var diffMins = Math.floor(diffMs / 60000);
+
+        var timeDisplay = '';
+        if (diffMins <= 0) {
+            timeDisplay = 'Nå';
+        } else if (diffMins < 15) {
+            timeDisplay = diffMins + ' min';
+        } else {
+            var hours = arrivalTime.getHours().toString().padStart(2, '0');
+            var minutes = arrivalTime.getMinutes().toString().padStart(2, '0');
+            timeDisplay = hours + ':' + minutes;
+        }
+
+        // HTML Structure
+        var item = document.createElement('div');
+        item.className = 'bus-item';
+
+        var lineBox = document.createElement('div');
+        lineBox.className = 'bus-line';
+        lineBox.textContent = lineCode;
+
+        var destBox = document.createElement('div');
+        destBox.className = 'bus-dest';
+        destBox.textContent = destination;
+
+        var timeBox = document.createElement('div');
+        timeBox.className = 'bus-time' + (isRealtime ? ' realtime' : '');
+        timeBox.textContent = timeDisplay;
+
+        item.appendChild(lineBox);
+        item.appendChild(destBox);
+        item.appendChild(timeBox);
+        container.appendChild(item);
+    });
+}
+
 // --- Initial Load ---
 document.addEventListener('DOMContentLoaded', function () {
     var logBox = document.getElementById('log-box');
@@ -262,8 +442,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     updateWeather();
     fetchNews();
+    fetchVGNews();
+    fetchBusData(); // Initial bus fetch
 
-    setInterval(updateWeather, 15 * 60 * 1000);
-    setInterval(fetchNews, 5 * 60 * 1000);
+    setInterval(updateWeather, 15 * 60 * 1000); // 15 min
+    setInterval(fetchNews, 5 * 60 * 1000); // 5 min NRK
+    setInterval(fetchVGNews, 5 * 60 * 1000); // 5 min VG
+    setInterval(fetchBusData, 60 * 1000); // 1 min (Bus data update)
+
     setInterval(rotateNews, 10000);
+    setInterval(rotateVGNews, 10000);
 });

@@ -9,10 +9,10 @@
 
 body {
     font-family: 'Inter', sans-serif;
-    background-color: #111827;
-    /* bg-gray-900 */
-    color: #F3F4F6;
-    /* text-gray-100 */
+    background-color: #2E3440;
+    /* Nord Polar Night 0 */
+    color: #ECEFF4;
+    /* Nord Snow Storm 2 */
     padding: 1rem;
     /* p-4 */
     min-height: 100vh;
@@ -58,24 +58,19 @@ body {
     /* gap-6 */
 }
 
-/* 5-kolonners grid på medium skjermer og oppover */
-@media (min-width: 768px) {
-    .main-grid-container {
-        grid-template-columns: repeat(5, 1fr);
-        /* md:grid-cols-5 */
-    }
-}
-
+/* 3-kolonners grid på medium skjermer og oppover */
 @media (min-width: 1024px) {
     .main-grid-container {
+        grid-template-columns: 2fr 1fr 2fr;
+        /* Bus - Weather - Bus */
         gap: 2rem;
-        /* lg:gap-8 */
     }
 }
 
 /* --- Kort (brukt for buss-kolonner) --- */
 .card {
-    background-color: rgba(31, 41, 55, 0.5);
+    background-color: rgba(59, 66, 82, 0.5);
+    /* Nord Polar Night 1 with opacity */
     /* bg-gray-800/50 */
     padding: 1rem;
     /* p-4 */
@@ -93,7 +88,8 @@ body {
     align-items: center;
     padding-bottom: 0.5rem;
     /* pb-2 */
-    border-bottom: 1px solid #374151;
+    border-bottom: 1px solid #434C5E;
+    /* Nord Polar Night 2 */
     /* border-gray-700 */
 }
 
@@ -103,15 +99,16 @@ body {
     line-height: 2rem;
     font-weight: 700;
     /* font-bold */
-    color: #FACC15;
-    /* text-yellow-400 */
+    color: #00E5FF;
+    /* Neon Cyan */
+    /* text-cyan-400 */
 }
 
 /* --- Buss-kolonner (layout) --- */
-@media (min-width: 768px) {
+/* Fjernet col-span-2 logikk, nå styres det av main-grid-container */
+@media (min-width: 1024px) {
     .bus-column {
-        grid-column: span 2 / span 2;
-        /* md:col-span-2 */
+        grid-column: auto;
     }
 }
 
@@ -139,10 +136,10 @@ body {
     /* text-2xl */
     font-weight: 700;
     /* font-bold */
-    background-color: #FACC15;
-    /* bg-yellow-400 */
-    color: #000000;
-    /* text-black */
+    background-color: #00E5FF;
+    /* Neon Cyan */
+    color: #111827;
+    /* Dark text for contrast */
     padding: 0.25rem 0.75rem;
     /* px-3 py-1 */
     border-radius: 0.25rem;
@@ -159,16 +156,35 @@ body {
     justify-content: center;
     align-items: center;
     gap: 2rem;
-    /* gap-8 */
     height: 100%;
-    /* NY: Sørger for at kolonnen fyller grid-cellen sin */
 }
 
-/* Setter kolonnebredde på medium skjermer */
-@media (min-width: 768px) {
+/* Force layout on Desktop */
+@media (min-width: 1024px) {
+    .main-grid-container {
+        grid-template-columns: 2fr 1fr 2fr;
+        /* Left Bus | Weather | Right Bus */
+        grid-template-rows: 1fr;
+        /* Force single row */
+    }
+
+    /* Assign explicit columns based on order */
+    .main-grid-container> :nth-child(1) {
+        grid-column: 1;
+    }
+
+    .main-grid-container> :nth-child(2) {
+        grid-column: 2;
+    }
+
+    .main-grid-container> :nth-child(3) {
+        grid-column: 3;
+    }
+
+    /* Ensure no spans interfere */
+    .bus-column,
     .weather-column {
-        grid-column: span 1 / span 1;
-        /* md:col-span-1 */
+        grid-column-end: span 1;
     }
 }
 
@@ -202,13 +218,13 @@ body {
     line-height: 1;
     font-weight: 700;
     /* font-bold */
-    color: #F87171;
-    /* text-red-400 */
+    color: #FF1744;
+    /* Neon Red */
 }
 
 .weather-temp-cold {
-    color: #22D3EE !important;
-    /* text-cyan-400 */
+    color: #00E5FF !important;
+    /* Neon Cyan */
 }
 
 /* --- Logg-boks --- */
@@ -216,7 +232,8 @@ body {
     width: 100%;
     max-width: 24rem;
     /* max-w-sm */
-    background-color: #1F2937;
+    background-color: #2E3440;
+    /* Nord Polar Night 1 */
     /* bg-gray-800 */
     padding: 1rem;
     /* p-4 */
@@ -227,7 +244,8 @@ body {
     font-size: 0.75rem;
     /* text-xs */
     line-height: 1rem;
-    color: #9CA3AF;
+    color: #D8DEE9;
+    /* Nord Snow Storm 0 */
     /* text-gray-400 */
     height: 6rem;
     /* h-24 */
@@ -254,7 +272,8 @@ body {
 }
 
 .ticker-bar {
-    background-color: #1F2937;
+    background-color: rgba(37, 42, 52, 0.6);
+    /* Nord Polar Night 1 */
     /* bg-gray-800 */
     padding: 1.25rem;
     /* p-5 (var p-3) */
@@ -267,7 +286,8 @@ body {
 }
 
 .tag {
-    color: #FFFFFF;
+    color: #ECEFF4;
+    /* Nord Snow Storm 2 */
     /* text-white */
     font-weight: 700;
     /* font-bold */
@@ -282,8 +302,8 @@ body {
 }
 
 .nrk-tag {
-    background-color: #2563EB;
-    /* bg-blue-600 */
+    background-color: #2979FF;
+    /* Neon Blue */
     padding-left: 0.75rem;
     /* px-3 */
     padding-right: 0.75rem;
@@ -291,7 +311,8 @@ body {
 
 #nrk-headline {
     flex-grow: 1;
-    color: #D1D5DB;
+    color: #E5E9F0;
+    /* Nord Snow Storm 1 */
     /* text-gray-300 */
     white-space: nowrap;
     /* truncate */
@@ -305,8 +326,8 @@ body {
 }
 
 .yr-tag {
-    background-color: #06B6D4;
-    /* bg-cyan-500 */
+    background-color: #00E5FF;
+    /* Neon Cyan */
     height: 3rem;
     /* h-12 (var h-10) */
     width: 3rem;
@@ -324,7 +345,8 @@ body {
 /* --- Footer --- */
 .footer {
     text-align: center;
-    color: #6B7280;
+    color: #4C566A;
+    /* Nord Polar Night 3 */
     /* text-gray-500 */
     font-size: 0.875rem;
     /* text-sm */
@@ -335,5 +357,182 @@ body {
 
 .footer span {
     /* text-red-500 */
-    color: #EF4444;
+    color: #FF1744;
+    /* Neon Red */
+}
+
+/* --- Ny Buss Liste Styles --- */
+.bus-list {
+    margin-top: 1rem;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.bus-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #434C5E;
+    /* Nord Polar Night 2 */
+    /* border-gray-700 */
+}
+
+.bus-item:last-child {
+    border-bottom: none;
+}
+
+.bus-line {
+    background-color: #434C5E;
+    /* Nord Polar Night 2 */
+    /* bg-gray-700 */
+    color: #ECEFF4;
+    /* Nord Snow Storm 2 */
+    /* text-gray-100 */
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    margin-right: 0.75rem;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.bus-dest {
+    flex-grow: 1;
+    font-size: 1.125rem;
+    /* text-lg */
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 0.5rem;
+}
+
+.bus-time {
+    font-weight: 700;
+    color: #00E5FF;
+    /* Neon Cyan */
+    font-size: 1.25rem;
+    /* text-xl */
+    white-space: nowrap;
+}
+
+.bus-time.realtime {
+    color: #00E676;
+    /* Neon Green */
+}
+
+/* --- Main Clock --- */
+#clock-main {
+    font-size: 6rem;
+    /* text-8xl approx */
+    font-weight: 800;
+    color: #ECEFF4;
+    /* Nord Snow Storm 2 */
+    /* text-gray-100 */
+    line-height: 1;
+    text-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    margin-bottom: 2rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Weather Icons --- */
+.weather-icon {
+    height: 2rem;
+    /* h-8 */
+    width: 2rem;
+    vertical-align: middle;
+    margin-left: 0.5rem;
+    display: none;
+    /* Skjult til lastet */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* --- News Split Layout --- */
+.ticker-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .ticker-grid {
+        grid-template-columns: 1fr 1fr;
+        /* Two equal columns on large screens */
+        gap: 2rem;
+    }
+}
+
+/* Specific Ticker Adjustments */
+.ticker-bar {
+    gap: 1.5rem;
+    /* Reset gap */
+    width: 100%;
+}
+
+.vg-tag {
+    background-color: #FF1744;
+    /* Neon Red */
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+}
+
+#vg-headline {
+    flex-grow: 1;
+    color: #E5E9F0;
+    /* Nord Snow Storm 1 */
+    /* text-gray-300 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+    font-size: 1.25rem;
+    /* text-xl */
+    padding: 1.05rem;
+}
+
+/* --- Large Background Weather Icons --- */
+.weather-temp-wrapper {
+    position: relative;
+    display: inline-block;
+    /* ensure width fits content */
+    margin-top: -0.5rem;
+    /* adjust vertical check */
+}
+
+.weather-bg-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 9rem;
+    /* Increased size (was 6rem) */
+    height: 9rem;
+    opacity: 0.4;
+    /* Slightly transparent */
+    z-index: 0;
+    display: none;
+    /* Hidden until loaded */
+    filter: drop-shadow(0 0 5px rgba(236, 239, 244, 0.2));
+    /* Nord glow */
+}
+
+#temp-grimstad,
+#temp-kristiansand,
+#temp-arendal,
+#temp-hovag,
+.weather-temp {
+    position: relative;
+    z-index: 10;
+    /* Text on top */
+}
+
+/* Update row wrapper for better centering */
+.weather-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 1.5rem;
 }

@@ -124,27 +124,75 @@ function translateSymbolCode(code) {
 }
 
 // --- News ---
-function fetchRSS(url, listId) {
+function fetchRSS(url, listId, featuredId) {
     const proxyUrl = CORS_PROXY_PREFIX + encodeURIComponent(url);
 
     fetch(proxyUrl)
         .then(response => response.text())
         .then(str => new window.DOMParser().parseFromString(str, "text/xml"))
         .then(data => {
-            const items = data.querySelectorAll("item");
+            const items = Array.from(data.querySelectorAll("item"));
             const listEl = document.getElementById(listId);
-            listEl.innerHTML = ''; // Clear loading text
+            const featuredEl = document.getElementById(featuredId);
 
-            // Take top 10
-            let count = 0;
-            items.forEach(item => {
-                if (count >= 10) return;
-                const title = item.querySelector("title").textContent.replace("<![CDATA[", "").replace("]]>", "").trim();
+            listEl.innerHTML = '';
+            featuredEl.innerHTML = '';
 
+            if (items.length === 0) {
+                listEl.innerHTML = '<li>Ingen nyheter funnet.</li>';
+                return;
+            }
+
+            // Extract items with image parsing
+            const parsedItems = items.map(item => {
+                const title = item.querySelector("title")?.textContent.replace("<![CDATA[", "").replace("]]>", "").trim() || "Uten tittel";
+                const link = item.querySelector("link")?.textContent || "#";
+                let description = item.querySelector("description")?.textContent || "";
+
+                // Try to find image
+                let imageUrl = null;
+                const enclosure = item.querySelector("enclosure");
+                const mediaContent = item.getElementsByTagNameNS("*", "content")[0] || item.getElementsByTagName("media:content")[0]; // Namespace matching can be tricky
+
+                if (enclosure && enclosure.getAttribute("type")?.startsWith("image")) {
+                    imageUrl = enclosure.getAttribute("url");
+                } else if (mediaContent && mediaContent.getAttribute("url")) {
+                    imageUrl = mediaContent.getAttribute("url");
+                } else {
+                    // Fallback: Try regex on description
+                    const imgMatch = description.match(/<img[^>]+src="([^">]+)"/);
+                    if (imgMatch) imageUrl = imgMatch[1];
+                }
+
+                return { title, link, imageUrl, description };
+            });
+
+            // 1. Render Featured Story (First item)
+            // If first item has no image, try finding the first one that does? 
+            // Or just always use the first one. Let's use the first one for recency.
+            const featuredItem = parsedItems[0];
+
+            if (featuredItem) {
+                // If no image, use a placeholder or logic to skip? 
+                // For now, let's assume most news have images. If not, use a pattern.
+                const bgImage = featuredItem.imageUrl || 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?auto=format&fit=crop&w=800&q=80'; // Fallback Nord-ish
+
+                featuredEl.innerHTML = `
+                    <div class="news-featured">
+                        <img src="${bgImage}" alt="${featuredItem.title}" class="featured-img">
+                        <div class="featured-overlay">
+                            <h3 class="featured-title">${featuredItem.title}</h3>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // 2. Render List (Items 1-5)
+            const listItems = parsedItems.slice(1, 6);
+            listItems.forEach(item => {
                 const li = document.createElement('li');
-                li.textContent = title;
+                li.textContent = item.title;
                 listEl.appendChild(li);
-                count++;
             });
         })
         .catch(error => {
@@ -154,8 +202,8 @@ function fetchRSS(url, listId) {
 }
 
 function updateNews() {
-    fetchRSS(NRK_RSS_URL, 'nrk-news-list');
-    fetchRSS(VG_RSS_URL, 'vg-news-list');
+    fetchRSS(NRK_RSS_URL, 'nrk-news-list', 'nrk-featured');
+    fetchRSS(VG_RSS_URL, 'vg-news-list', 'vg-featured');
 }
 
 // --- Screensaver & Refresh Logic ---

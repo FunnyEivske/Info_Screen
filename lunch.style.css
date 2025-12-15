@@ -1,51 +1,28 @@
 /* --- Stilark for lunch.html --- */
-body, html {
+body,
+html {
     height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
-    background-color: #000;
-    color: white;
+    background-color: #2E3440;
+    /* Nord Polar Night 0 */
+    color: #ECEFF4;
+    /* Nord Snow Storm 2 */
     font-family: 'Inter', sans-serif;
-    overflow: hidden; /* Skjuler scrollbars */
+    overflow: hidden;
+    /* Skjuler scrollbars */
 }
 
-/* --- NY KLOKKE (øverst høyre) --- */
+/* --- NY KLOKKE (Removed logic kept just in case of revert, but hidden) --- */
 #vakt-klokke {
-    position: fixed;
-    top: 10px; /* Samme padding som vakt-bar */
-    right: 20px; /* Samme padding som vakt-bar */
-    z-index: 6; /* Over vakt-bar, under meldinger */
-    
-    background-color: #FACC15; /* Samme gule som titler */
-    color: #000; /* Svart tekst for kontrast */
-    font-weight: 700;
-    font-size: 1.8vw; /* Samme som vakt-titler */
-    
-    padding: 5px 15px;
-    border-radius: 5px;
-    
-    /* Skjules som standard, vises av JS */
-    display: none; 
+    display: none;
 }
 
 
-/* --- VAKT-BAR --- */
+/* --- VAKT-BAR (Removed) --- */
 #vakt-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 5; /* Under meldinger, over akvarium */
-    background-color: rgba(0, 0, 0, 0.5); /* Gjennomsiktig bakgrunn */
-    display: flex;
-    justify-content: space-around;
-    align-items: flex-start;
-    padding: 10px 20px;
-    box-sizing: border-box;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    /* Skjules som standard, vises av JS */
-    display: none; 
+    display: none;
 }
 
 .vakt-seksjon {
@@ -56,7 +33,8 @@ body, html {
 .vakt-seksjon h3 {
     font-size: 1.8vw;
     font-weight: 700;
-    color: #FACC15; /* Gul farge, som i index.html */
+    color: #FACC15;
+    /* Gul farge, som i index.html */
     margin: 0 0 5px 0;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -65,7 +43,8 @@ body, html {
 .vakt-seksjon p {
     font-size: 1.5vw;
     font-weight: 400;
-    color: #f0f0f0;
+    color: #ECEFF4;
+    /* Nord Snow Storm 2 */
     margin: 0;
     line-height: 1.4;
 }
@@ -80,41 +59,51 @@ body, html {
     height: 100%;
     z-index: 1;
     transition: opacity 0.5s ease-in-out;
-    
-    /* ENDRING: Byttet fra solid farge til en gradient */
-    background: linear-gradient(
-        to bottom, 
-        #003366 0%, /* Lysere blå på toppen */
-        #001f3f 70%, /* Mørk blå */
-        #001122 100% /* Mørk bunn (grus) */
-    );
-}
 
+    /* ENDRING: Nord Theme Gradient (Mørkere Dyp) */
+    background: linear-gradient(to bottom,
+            #2E3440 0%,
+            /* Polar Night 0 */
+            #3B4252 50%,
+            /* Polar Night 1 */
+            #434C5E 100%
+            /* Polar Night 2 */
+        );
+}
 
 /* Overlay for meldinger ("News Bar") */
 #message-overlay {
     position: fixed;
-    bottom: 0; /* Plassert i bunnen */
+    bottom: 0;
+    /* Plassert i bunnen */
     left: 0;
     width: 100%;
-    height: auto; /* Høyden styres av padding */
-    
-    display: flex; /* Beholdt flex for sentrering */
+    height: auto;
+    /* Høyden styres av padding */
+
+    display: flex;
+    /* Beholdt flex for sentrering */
     justify-content: center;
     align-items: center;
     text-align: center;
     z-index: 10;
-    
-    background-color: rgba(0, 0, 0, 0.8); /* Litt mørkere */
-    font-size: 2.5vw; /* Mindre font for en bar */
+
+    background-color: rgba(37, 42, 52, 0.9);
+    /* Nord Polar Night 1 */
+    border-top: 1px solid #4C566A;
+    /* Nord Polar Night 3 */
+    font-size: 2.5vw;
     font-weight: 700;
-    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    text-shadow: none;
+    color: #00E5FF;
+    /* Neon Cyan */
     padding: 20px;
-    box-sizing: border-box; /* Sørger for at padding er inkludert */
+    box-sizing: border-box;
 
     /* Animasjonslogikk */
     opacity: 0;
-    transform: translateY(100%); /* Starter utenfor skjermen */
+    transform: translateY(100%);
+    /* Starter utenfor skjermen */
     pointer-events: none;
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
@@ -122,7 +111,8 @@ body, html {
 /* Klasse for å vise baren */
 #message-overlay.visible {
     opacity: 1;
-    transform: translateY(0); /* Beveger seg inn på skjermen */
+    transform: translateY(0);
+    /* Beveger seg inn på skjermen */
     pointer-events: auto;
 }
 
@@ -134,10 +124,12 @@ body, html {
     left: 0;
     width: 100%;
     height: 100%;
-    display: none; /* Skjult som standard */
+    display: none;
+    /* Skjult som standard */
     justify-content: center;
     align-items: center;
-    background-color: #000; 
+    background-color: #2E3440;
+    /* Nord Polar Night 0 */
     z-index: 20;
     transition: opacity 0.5s ease-in-out;
 }
