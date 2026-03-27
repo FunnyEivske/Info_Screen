@@ -95,7 +95,7 @@
 
     <!-- Small Floating QR Code -->
     <div
-        class="fixed bottom-6 left-6 z-50 bg-m3-surfaceHigh/80 backdrop-blur-md p-3 rounded-m3-md shadow-[0_8px_20px_rgba(0,0,0,0.5)] border border-m3-primaryContainer hover:bg-m3-surfaceHigh transition-colors group">
+        class="fixed bottom-6 left-6 z-[100] bg-m3-surfaceHigh/80 backdrop-blur-md p-3 rounded-m3-md shadow-[0_8px_20px_rgba(0,0,0,0.5)] border border-m3-primaryContainer hover:bg-m3-surfaceHigh transition-colors group">
         <div class="flex flex-col items-center gap-2">
             <div id="qrcode" class="bg-white p-1 rounded-lg shadow-inner"></div>
             <span
@@ -260,23 +260,29 @@
                 const items = [];
                 snap.forEach(d => items.push({ id: d.id, ...d.data() }));
 
-                // Auto-cleanup Expired
-                const now = new Date();
-                const todayStr = now.toISOString().split('T')[0];
+                // Auto-cleanup Expired (30 days past endDate)
+                const cutoff = new Date();
+                cutoff.setDate(cutoff.getDate() - 30);
+                const cutoffStr = cutoff.toISOString().split('T')[0];
+
+                const todayStrForDisplay = new Date().toISOString().split('T')[0];
+                const activeItems = [];
 
                 items.forEach(async (item) => {
-                    if (item.endDate && item.endDate < todayStr) {
+                    if (item.endDate && item.endDate < cutoffStr) {
                         try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', currentSeason, item.id)); } 
                         catch (e) { console.error("Cleanup fail", e); }
+                    } else if (!item.endDate || item.endDate >= todayStrForDisplay) {
+                        activeItems.push(item);
                     }
                 });
 
                 // Sort items by startDate
-                items.sort((a, b) => (a.startDate || '').localeCompare(b.startDate || ''));
-                renderGrid(items);
+                activeItems.sort((a, b) => (a.startDate || '').localeCompare(b.startDate || ''));
+                renderGrid(activeItems);
 
                 // Check active holidays
-                const hasActiveHolidays = items.length > 0;
+                const hasActiveHolidays = activeItems.length > 0;
                 
                 // Rotation logic
                 clearInterval(toggleInterval);
@@ -309,14 +315,17 @@
         }
 
         function getSeason() {
-            const d = new Date();
-            const m = d.getMonth(), day = d.getDate();
-            if (m === 11 || (m === 0 && day <= 5)) return 'christmas';
-            if (m === 1 && day >= 15 && day <= 28) return 'winter';
-            if (m === 3 && day <= 22) return 'spring';
-            if ((m === 5 && day >= 20) || m === 6 || (m === 7 && day <= 18)) return 'summer';
-            if ((m === 8 && day >= 28) || (m === 9 && day <= 10)) return 'autumn';
-            return 'winter';
+            const date = new Date();
+            const month = date.getMonth(); 
+            const day = date.getDate();
+
+            if (month === 11 || (month === 0 && day <= 5)) return 'christmas';
+            if (month === 1 && day >= 15 && day <= 28) return 'winter';
+            if (month === 2 || (month === 3 && day <= 22)) return 'spring';
+            if ((month === 5 && day >= 20) || month === 6 || (month === 7 && day <= 18)) return 'summer';
+            if ((month === 8 && day >= 28) || (month === 9 && day <= 10)) return 'autumn';
+
+            return 'spring'; 
         }
 
         function createCard(emp) {
@@ -373,13 +382,13 @@
 
         function applySeasonTheme(season) {
             const themes = {
-                christmas: "Juleferie 🎄",
-                winter: "Vinterferie ⛷️",
-                spring: "Påskeferie 🐣",
-                summer: "Sommerferie ☀️",
-                autumn: "Høstferie 🍂"
+                christmas: "FERIE 🎄",
+                winter: "FERIE ⛷️",
+                spring: "FERIE 🐣",
+                summer: "FERIE ☀️",
+                autumn: "FERIE 🍂"
             };
-            const title = themes[season] || "Ferieoversikt";
+            const title = themes[season] || "FERIE ⛱️";
             document.getElementById('tracker-title').innerText = title;
         }
 

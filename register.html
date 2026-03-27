@@ -69,11 +69,11 @@
 
             if (month === 11 || (month === 0 && day <= 5)) return 'christmas';
             if (month === 1 && day >= 15 && day <= 28) return 'winter';
-            if (month === 3 && day <= 22) return 'spring';
+            if (month === 2 || (month === 3 && day <= 22)) return 'spring';
             if ((month === 5 && day >= 20) || month === 6 || (month === 7 && day <= 18)) return 'summer';
             if ((month === 8 && day >= 28) || (month === 9 && day <= 10)) return 'autumn';
 
-            return 'christmas'; 
+            return 'spring'; 
         }
 
         window.submitForm = async function (e) {
