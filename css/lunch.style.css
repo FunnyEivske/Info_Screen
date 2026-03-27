@@ -1,24 +1,20 @@
-/* --- Stilark for lunch.html --- */
+/* --- Stilark for lunch.html (Material 3 Dark Theme) --- */
 body,
 html {
     height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
-    background-color: #2E3440;
-    /* Nord Polar Night 0 */
-    color: #ECEFF4;
-    /* Nord Snow Storm 2 */
-    font-family: 'Inter', sans-serif;
-    overflow: hidden;
-    /* Skjuler scrollbars */
+    background-color: #141218; /* M3 background */
+    color: #E6E0E9; /* M3 on-background */
+    font-family: 'Roboto', sans-serif;
+    overflow: hidden; /* Skjuler scrollbars */
 }
 
 /* --- NY KLOKKE (Removed logic kept just in case of revert, but hidden) --- */
 #vakt-klokke {
     display: none;
 }
-
 
 /* --- VAKT-BAR (Removed) --- */
 #vakt-bar {
@@ -32,9 +28,8 @@ html {
 
 .vakt-seksjon h3 {
     font-size: 1.8vw;
-    font-weight: 700;
-    color: #FACC15;
-    /* Gul farge, som i index.html */
+    font-weight: 500;
+    color: #FFB4AB; /* M3 error/warm tone */
     margin: 0 0 5px 0;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -43,8 +38,7 @@ html {
 .vakt-seksjon p {
     font-size: 1.5vw;
     font-weight: 400;
-    color: #ECEFF4;
-    /* Nord Snow Storm 2 */
+    color: #E6E0E9;
     margin: 0;
     line-height: 1.4;
 }
@@ -60,14 +54,11 @@ html {
     z-index: 1;
     transition: opacity 0.5s ease-in-out;
 
-    /* ENDRING: Nord Theme Gradient (Mørkere Dyp) */
+    /* M3 Dark gradient representation of water/depth */
     background: linear-gradient(to bottom,
-            #2E3440 0%,
-            /* Polar Night 0 */
-            #3B4252 50%,
-            /* Polar Night 1 */
-            #434C5E 100%
-            /* Polar Night 2 */
+            #141218 0%,
+            #211F26 50%,
+            #2B2930 100%
         );
 }
 
@@ -75,35 +66,27 @@ html {
 #message-overlay {
     position: fixed;
     bottom: 0;
-    /* Plassert i bunnen */
     left: 0;
     width: 100%;
     height: auto;
-    /* Høyden styres av padding */
 
     display: flex;
-    /* Beholdt flex for sentrering */
     justify-content: center;
     align-items: center;
     text-align: center;
     z-index: 10;
 
-    background-color: rgba(37, 42, 52, 0.9);
-    /* Nord Polar Night 1 */
-    border-top: 1px solid #4C566A;
-    /* Nord Polar Night 3 */
+    background-color: rgba(33, 31, 38, 0.9); /* M3 Surface matching */
+    border-top: 1px solid #4A4458; /* M3 Outline */
     font-size: 2.5vw;
-    font-weight: 700;
+    font-weight: 500; /* M3 typically prefers medium weights */
     text-shadow: none;
-    color: #00E5FF;
-    /* Neon Cyan */
+    color: #D0BCFF; /* M3 Primary */
     padding: 20px;
     box-sizing: border-box;
 
-    /* Animasjonslogikk */
     opacity: 0;
     transform: translateY(100%);
-    /* Starter utenfor skjermen */
     pointer-events: none;
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
@@ -112,10 +95,8 @@ html {
 #message-overlay.visible {
     opacity: 1;
     transform: translateY(0);
-    /* Beveger seg inn på skjermen */
     pointer-events: auto;
 }
-
 
 /* Skjerm for "etter stengetid" */
 #after-hours {
@@ -125,11 +106,9 @@ html {
     width: 100%;
     height: 100%;
     display: none;
-    /* Skjult som standard */
     justify-content: center;
     align-items: center;
-    background-color: #2E3440;
-    /* Nord Polar Night 0 */
+    background-color: #141218; /* M3 Background */
     z-index: 20;
     transition: opacity 0.5s ease-in-out;
 }

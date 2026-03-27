@@ -6,11 +6,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrer Ferie</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:wght@400;700;800&display=swap"
-        rel="stylesheet">
-
-    <!-- Firebase Imports -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        m3: {
+                            bg: '#141218',
+                            surface: '#211F26', 
+                            surfaceHigh: '#2B2930', 
+                            primary: '#D0BCFF',
+                            onPrimary: '#381E72',
+                            primaryContainer: '#4F378B',
+                            onPrimaryContainer: '#EADDFF',
+                            secondary: '#CCC2DC',
+                            onSecondary: '#332D41',
+                            error: '#F2B8B5',
+                            onError: '#8C1D18'
+                        }
+                    },
+                    fontFamily: { sans: ['Roboto', 'sans-serif'], },
+                    borderRadius: { 'm3': '28px', 'm3-md': '16px' }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -40,37 +62,20 @@
             }
         }
 
-        // --- Seasonal Logic (For correct data collection) ---
         function getSeason() {
             const date = new Date();
-            const month = date.getMonth(); // 0-11
+            const month = date.getMonth(); 
             const day = date.getDate();
 
-            // Jul: 1. Desember - 5. Januar
-            if (month === 11 || (month === 0 && day <= 5)) {
-                return 'christmas';
-            }
-            // Vinterferie (Agder: Uke 8): Ca. 15. Februar - 1. Mars
-            if (month === 1 && day >= 15 && day <= 28) {
-                return 'winter';
-            }
-            // Påske/Vår: 1. April - 22. April
-            if (month === 3 && day <= 22) {
-                return 'spring';
-            }
-            // Sommer (Skoleferie): ca 20. Juni - 18. August
-            if ((month === 5 && day >= 20) || month === 6 || (month === 7 && day <= 18)) {
-                return 'summer';
-            }
-            // Høst (Agder: Uke 40): Ca 28. September - 10. Oktober
-            if ((month === 8 && day >= 28) || (month === 9 && day <= 10)) {
-                return 'autumn';
-            }
+            if (month === 11 || (month === 0 && day <= 5)) return 'christmas';
+            if (month === 1 && day >= 15 && day <= 28) return 'winter';
+            if (month === 3 && day <= 22) return 'spring';
+            if ((month === 5 && day >= 20) || month === 6 || (month === 7 && day <= 18)) return 'summer';
+            if ((month === 8 && day >= 28) || (month === 9 && day <= 10)) return 'autumn';
 
-            return 'christmas'; // Fallback if no specific season, or default to generic 'winter'
+            return 'christmas'; 
         }
 
-        // --- Form Submission ---
         window.submitForm = async function (e) {
             e.preventDefault();
             const name = document.getElementById('input-name').value;
@@ -87,11 +92,10 @@
             btn.disabled = true;
 
             try {
-                const currentSeason = getSeason() || 'christmas'; // Ensure we have a collection
+                const currentSeason = getSeason() || 'christmas'; 
                 const col = collection(db, 'artifacts', appId, 'public', 'data', currentSeason);
                 await addDoc(col, { name, color, emoji, startDate, endDate });
 
-                // Success UI
                 document.getElementById('form-container').classList.add('hidden');
                 document.getElementById('success-message').classList.remove('hidden');
                 document.getElementById('vacation-form').reset();
@@ -103,14 +107,13 @@
             }
         }
 
-        // --- UI Logic ---
         window.selectColor = function (color) {
             document.getElementById('selected-color').value = color;
             document.querySelectorAll('.color-btn').forEach(btn => {
                 if (btn.dataset.color === color) {
-                    btn.classList.add('ring-4', 'ring-offset-2', 'ring-gray-400', 'scale-110');
+                    btn.classList.add('ring-4', 'ring-offset-2', 'ring-m3-primary', 'scale-110');
                 } else {
-                    btn.classList.remove('ring-4', 'ring-offset-2', 'ring-gray-400', 'scale-110');
+                    btn.classList.remove('ring-4', 'ring-offset-2', 'ring-m3-primary', 'scale-110');
                 }
             });
         }
@@ -119,11 +122,11 @@
             document.getElementById('selected-emoji').value = emoji;
             document.querySelectorAll('.emoji-btn').forEach(btn => {
                 if (btn.dataset.emoji === emoji) {
-                    btn.classList.add('bg-blue-100', 'border-blue-500', 'scale-110');
-                    btn.classList.remove('border-transparent');
+                    btn.classList.add('bg-m3-primaryContainer', 'text-m3-onPrimaryContainer', 'scale-110', 'font-bold');
+                    btn.classList.remove('hover:bg-m3-surface');
                 } else {
-                    btn.classList.remove('bg-blue-100', 'border-blue-500', 'scale-110');
-                    btn.classList.add('border-transparent');
+                    btn.classList.remove('bg-m3-primaryContainer', 'text-m3-onPrimaryContainer', 'scale-110', 'font-bold');
+                    btn.classList.add('hover:bg-m3-surface');
                 }
             });
         }
@@ -131,149 +134,129 @@
         window.resetForm = function () {
             document.getElementById('success-message').classList.add('hidden');
             document.getElementById('form-container').classList.remove('hidden');
-            window.selectColor('red');
-            window.selectEmoji('🎅');
+            window.selectColor('purple');
+            window.selectEmoji('🏖️');
         }
 
         initApp();
-        // Init Selection
         window.addEventListener('load', () => {
-            window.selectColor('red');
-            window.selectEmoji('🎅');
+            window.selectColor('purple');
+            window.selectEmoji('🏖️');
         });
 
     </script>
     <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            background: radial-gradient(circle at center, #2e3440 0%, #242933 100%);
-            color: #eceff4;
+        body { background-color: #141218; color: #E6E0E9; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Material 3 Input Field overrides */
+        input[type="text"], input[type="date"] {
+            background-color: #211F26; /* m3-surface */
+            border-bottom: 2px solid #4A4458; /* neutral */
+            border-radius: 4px 4px 0 0;
+            transition: all 0.2s;
         }
-
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+        input[type="text"]:focus, input[type="date"]:focus {
+            border-bottom: 2px solid #D0BCFF; /* m3-primary */
+            background-color: #2B2930;
         }
     </style>
 </head>
 
 <body class="min-h-screen flex items-center justify-center p-4">
 
+    <!-- Material 3 Surface High Container -->
     <div id="form-container"
-        class="bg-[#3b4252] rounded-2xl w-full max-w-lg p-6 relative shadow-2xl border-4 border-[#5e81ac] max-h-[90vh] overflow-y-auto no-scrollbar">
-        <h2 class="text-3xl font-bold text-[#eceff4] mb-6 text-center">🎅 Når tar du ferie?</h2>
+        class="bg-m3-surfaceHigh rounded-m3 w-full max-w-lg p-8 relative shadow-[0_4px_12px_rgba(0,0,0,0.2)] border border-[#4A4458] max-h-[90vh] overflow-y-auto no-scrollbar">
+        
+        <!-- Back Button -->
+        <a href="index.html" class="absolute top-6 right-6 text-m3-secondary hover:text-white transition-colors" title="Tilbake til forsiden">
+            ✕
+        </a>
+
+        <div class="w-16 h-16 rounded-full bg-m3-primaryContainer flex items-center justify-center mb-6 mx-auto text-3xl">
+            ✈️
+        </div>
+
+        <h2 class="text-3xl font-bold text-white mb-2 text-center">Registrer Ferie</h2>
+        <p class="text-m3-secondary text-center text-sm mb-8">Når tar du ferie?</p>
 
         <form id="vacation-form" onsubmit="submitForm(event)" class="space-y-6">
             <!-- Navn -->
             <div>
-                <label class="block text-sm font-bold text-[#d8dee9] mb-1">Ditt Navn</label>
+                <label class="block text-sm font-bold text-m3-secondary mb-1">Ditt Navn</label>
                 <input type="text" id="input-name" required placeholder="F.eks. Kari Nordmann"
-                    class="w-full p-3 bg-[#2e3440] border border-[#4c566a] rounded-lg text-[#eceff4] focus:ring-2 focus:ring-[#88c0d0] outline-none placeholder-[#4c566a]">
+                    class="w-full p-4 text-white outline-none placeholder-[#4A4458]">
             </div>
 
             <!-- Fargevelger -->
             <div>
-                <label class="block text-sm font-bold text-[#d8dee9] mb-2">Velg din stil</label>
-                <input type="hidden" id="selected-color" value="red">
-                <div class="flex flex-wrap gap-3 justify-center">
-                    <button type="button" data-color="red" onclick="selectColor('red')"
-                        class="color-btn w-10 h-10 rounded-full bg-red-500 shadow-md hover:scale-110 transition"></button>
-                    <button type="button" data-color="pink" onclick="selectColor('pink')"
-                        class="color-btn w-10 h-10 rounded-full bg-pink-500 shadow-md hover:scale-110 transition"></button>
-                    <button type="button" data-color="blue" onclick="selectColor('blue')"
-                        class="color-btn w-10 h-10 rounded-full bg-blue-500 shadow-md hover:scale-110 transition"></button>
-                    <button type="button" data-color="green" onclick="selectColor('green')"
-                        class="color-btn w-10 h-10 rounded-full bg-green-500 shadow-md hover:scale-110 transition"></button>
-                    <button type="button" data-color="purple" onclick="selectColor('purple')"
-                        class="color-btn w-10 h-10 rounded-full bg-purple-500 shadow-md hover:scale-110 transition"></button>
-                    <button type="button" data-color="orange" onclick="selectColor('orange')"
-                        class="color-btn w-10 h-10 rounded-full bg-orange-500 shadow-md hover:scale-110 transition"></button>
-                    <button type="button" data-color="yellow" onclick="selectColor('yellow')"
-                        class="color-btn w-10 h-10 rounded-full bg-yellow-400 shadow-md hover:scale-110 transition"></button>
-                    <button type="button" data-color="teal" onclick="selectColor('teal')"
-                        class="color-btn w-10 h-10 rounded-full bg-teal-500 shadow-md hover:scale-110 transition"></button>
+                <label class="block text-sm font-bold text-m3-secondary mb-3">Fargetema</label>
+                <input type="hidden" id="selected-color" value="purple">
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button type="button" data-color="red" onclick="selectColor('red')" class="color-btn w-12 h-12 rounded-full bg-red-400 hover:scale-110 transition ring-offset-[#2B2930]"></button>
+                    <button type="button" data-color="pink" onclick="selectColor('pink')" class="color-btn w-12 h-12 rounded-full bg-pink-400 hover:scale-110 transition ring-offset-[#2B2930]"></button>
+                    <button type="button" data-color="blue" onclick="selectColor('blue')" class="color-btn w-12 h-12 rounded-full bg-blue-400 hover:scale-110 transition ring-offset-[#2B2930]"></button>
+                    <button type="button" data-color="green" onclick="selectColor('green')" class="color-btn w-12 h-12 rounded-full bg-green-400 hover:scale-110 transition ring-offset-[#2B2930]"></button>
+                    <button type="button" data-color="purple" onclick="selectColor('purple')" class="color-btn w-12 h-12 rounded-full bg-[#D0BCFF] hover:scale-110 transition ring-offset-[#2B2930]"></button>
+                    <button type="button" data-color="orange" onclick="selectColor('orange')" class="color-btn w-12 h-12 rounded-full bg-orange-400 hover:scale-110 transition ring-offset-[#2B2930]"></button>
+                    <button type="button" data-color="yellow" onclick="selectColor('yellow')" class="color-btn w-12 h-12 rounded-full bg-yellow-300 hover:scale-110 transition ring-offset-[#2B2930]"></button>
+                    <button type="button" data-color="teal" onclick="selectColor('teal')" class="color-btn w-12 h-12 rounded-full bg-teal-400 hover:scale-110 transition ring-offset-[#2B2930]"></button>
                 </div>
             </div>
 
             <!-- Emoji Velger -->
             <div>
-                <label class="block text-sm font-bold text-[#d8dee9] mb-2">Velg ikon</label>
-                <input type="hidden" id="selected-emoji" value="🎅">
+                <label class="block text-sm font-bold text-m3-secondary mb-3">Reisemål / Ikon</label>
+                <input type="hidden" id="selected-emoji" value="🏖️">
                 <div class="grid grid-cols-6 gap-2">
-                    <button type="button" data-emoji="🎅" onclick="selectEmoji('🎅')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🎅</button>
-                    <button type="button" data-emoji="🎄" onclick="selectEmoji('🎄')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🎄</button>
-                    <button type="button" data-emoji="❄️" onclick="selectEmoji('❄️')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">❄️</button>
-                    <button type="button" data-emoji="🎁" onclick="selectEmoji('🎁')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🎁</button>
-                    <button type="button" data-emoji="⛷️" onclick="selectEmoji('⛷️')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">⛷️</button>
-                    <button type="button" data-emoji="🏂" onclick="selectEmoji('🏂')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🏂</button>
-                    <button type="button" data-emoji="🏖️" onclick="selectEmoji('🏖️')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🏖️</button>
-                    <button type="button" data-emoji="✈️" onclick="selectEmoji('✈️')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">✈️</button>
-                    <button type="button" data-emoji="🎮" onclick="selectEmoji('🎮')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🎮</button>
-                    <button type="button" data-emoji="🍷" onclick="selectEmoji('🍷')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🍷</button>
-                    <button type="button" data-emoji="💤" onclick="selectEmoji('💤')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">💤</button>
-                    <button type="button" data-emoji="🕯️" onclick="selectEmoji('🕯️')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🕯️</button>
-                    <button type="button" data-emoji="☃️" onclick="selectEmoji('☃️')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">☃️</button>
-                    <button type="button" data-emoji="🦌" onclick="selectEmoji('🦌')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🦌</button>
-                    <button type="button" data-emoji="🌟" onclick="selectEmoji('🌟')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🌟</button>
-                    <button type="button" data-emoji="🐕" onclick="selectEmoji('🐕')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🐕</button>
-                    <button type="button" data-emoji="🏠" onclick="selectEmoji('🏠')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🏠</button>
-                    <button type="button" data-emoji="💻" onclick="selectEmoji('💻')"
-                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">💻</button>
+                    <button type="button" data-emoji="🎅" onclick="selectEmoji('🎅')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">🎅</button>
+                    <button type="button" data-emoji="❄️" onclick="selectEmoji('❄️')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">❄️</button>
+                    <button type="button" data-emoji="⛷️" onclick="selectEmoji('⛷️')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">⛷️</button>
+                    <button type="button" data-emoji="🏖️" onclick="selectEmoji('🏖️')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">🏖️</button>
+                    <button type="button" data-emoji="✈️" onclick="selectEmoji('✈️')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">✈️</button>
+                    <button type="button" data-emoji="🍷" onclick="selectEmoji('🍷')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">🍷</button>
+                    <button type="button" data-emoji="💤" onclick="selectEmoji('💤')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">💤</button>
+                    <button type="button" data-emoji="🏠" onclick="selectEmoji('🏠')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">🏠</button>
+                    <button type="button" data-emoji="💻" onclick="selectEmoji('💻')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">💻</button>
+                    <button type="button" data-emoji="🚗" onclick="selectEmoji('🚗')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">🚗</button>
+                    <button type="button" data-emoji="🏕️" onclick="selectEmoji('🏕️')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">🏕️</button>
+                    <button type="button" data-emoji="🏙️" onclick="selectEmoji('🏙️')" class="emoji-btn text-2xl p-2 rounded-full hover:bg-m3-surface transition">🏙️</button>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="block text-sm font-bold text-[#d8dee9] mb-1">Startdato</label>
-                    <input type="date" id="input-start" required
-                        class="w-full p-3 bg-[#2e3440] border border-[#4c566a] rounded-lg text-[#eceff4] focus:ring-2 focus:ring-[#88c0d0] outline-none">
+                    <label class="block text-sm font-bold text-m3-secondary mb-1">Fra og med</label>
+                    <input type="date" id="input-start" required class="w-full p-4 text-white outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-[#d8dee9] mb-1">Sluttdato</label>
-                    <input type="date" id="input-end" required
-                        class="w-full p-3 bg-[#2e3440] border border-[#4c566a] rounded-lg text-[#eceff4] focus:ring-2 focus:ring-[#88c0d0] outline-none">
+                    <label class="block text-sm font-bold text-m3-secondary mb-1">Til og med</label>
+                    <input type="date" id="input-end" required class="w-full p-4 text-white outline-none">
                 </div>
             </div>
 
-            <button type="submit" id="submit-btn"
-                class="w-full bg-[#8fbcbb] hover:bg-[#88c0d0] text-[#2e3440] font-bold py-3 rounded-lg mt-4 shadow transition">
+            <button type="submit" id="submit-btn" class="w-full bg-m3-primary hover:opacity-90 text-m3-onPrimary font-bold py-4 rounded-full mt-6 shadow transition">
                 Lagre Ferie
             </button>
         </form>
     </div>
 
-    <div id="success-message" class="hidden text-center">
-        <div class="bg-[#3b4252] rounded-2xl p-8 border-4 border-[#a3be8c] shadow-2xl max-w-sm mx-auto">
-            <div class="text-6xl mb-4">✅</div>
-            <h2 class="text-2xl font-bold text-[#eceff4] mb-2">Registrert!</h2>
-            <p class="text-[#d8dee9] mb-6">Din ferie er lagret. God ferie!</p>
-            <button onclick="resetForm()"
-                class="bg-[#81a1c1] hover:bg-[#88c0d0] text-[#2e3440] font-bold py-2 px-6 rounded-full transition">Registrer
-                en til</button>
+    <!-- Success Output -->
+    <div id="success-message" class="hidden text-center w-full">
+        <div class="bg-m3-surfaceHigh rounded-m3 p-10 border border-[#4A4458] shadow-2xl max-w-sm mx-auto">
+            <div class="w-20 h-20 rounded-full bg-[#A8C7FA] flex items-center justify-center mx-auto mb-6 text-4xl">
+                ✅
+            </div>
+            <h2 class="text-3xl font-bold text-white mb-2">Registrert!</h2>
+            <p class="text-m3-secondary mb-8">God ferie når den tid kommer!</p>
+            <button onclick="resetForm()" class="bg-m3-primary text-m3-onPrimary font-bold py-3 px-8 rounded-full transition hover:opacity-90">
+                Registrer en til
+            </button>
+            <p class="mt-6"><a href="index.html" class="text-sm text-m3-secondary underline hover:text-white">Tilbake til forside</a></p>
         </div>
     </div>
 
 </body>
-
 </html>

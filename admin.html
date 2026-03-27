@@ -6,12 +6,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Holiday Tracker Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for the Lock Icon -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        m3: {
+                            bg: '#141218',
+                            surface: '#211F26', 
+                            surfaceHigh: '#2B2930', 
+                            primary: '#D0BCFF',
+                            onPrimary: '#381E72',
+                            primaryContainer: '#4F378B',
+                            onPrimaryContainer: '#EADDFF',
+                            secondary: '#CCC2DC',
+                            onSecondary: '#332D41',
+                            error: '#F2B8B5',
+                            onError: '#8C1D18'
+                        }
+                    },
+                    fontFamily: { sans: ['Roboto', 'sans-serif'], },
+                    borderRadius: { 'm3': '28px', 'm3-md': '16px' }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // Changed to Email/Password import
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
@@ -31,23 +56,19 @@
         const db = getFirestore(app);
         const appId = 'holiday-tracker-main';
 
-        // Listen for authentication changes
         onAuthStateChanged(auth, (user) => {
             if (user && !user.isAnonymous) {
-                // Logged in securely
-                document.getElementById('auth-status').innerHTML = '<span class="text-green-400">Auth OK (' + user.email + ')</span> <button onclick="window.logout()" class="ml-3 bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded text-xs transition">Logg Ut</button>';
+                document.getElementById('auth-status').innerHTML = '<span class="text-green-400">Auth OK (' + user.email + ')</span> <button onclick="window.logout()" class="ml-3 bg-m3-error hover:opacity-80 text-m3-onError px-3 py-1 rounded text-xs transition">Logg Ut</button>';
                 document.getElementById('login-container').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 startListening();
             } else {
-                // Not logged in (or explicitly logged out)
-                document.getElementById('auth-status').innerHTML = '<span class="text-red-400">Ikke innlogget</span>';
+                document.getElementById('auth-status').innerHTML = '<span class="text-m3-error">Ikke innlogget</span>';
                 document.getElementById('login-container').classList.remove('hidden');
                 document.getElementById('main-content').classList.add('hidden');
             }
         });
 
-        // Handle Login Submission
         window.login = async function(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -61,7 +82,6 @@
             
             try {
                 await signInWithEmailAndPassword(auth, email, pass);
-                // onAuthStateChanged will handle the UI transition on success
             } catch(error) {
                 console.error("Login Failed", error);
                 errEl.innerText = "Feil e-postadresse eller passord.";
@@ -71,10 +91,9 @@
             }
         }
 
-        // Handle Logout
         window.logout = async function() {
             await signOut(auth);
-            document.getElementById('session-list').innerHTML = ''; // Clear sessions to ensure security on logout
+            document.getElementById('session-list').innerHTML = ''; 
         }
 
         function startListening() {
@@ -82,7 +101,7 @@
             const col = collection(db, 'artifacts', appId, 'sessions');
 
             onSnapshot(col, (snapshot) => {
-                document.getElementById('db-status').innerHTML = `<span class="text-green-400">Connected (${snapshot.size} sessions)</span>`;
+                document.getElementById('db-status').innerHTML = `<span class="text-green-800 bg-green-200 px-2 py-0.5 rounded-full text-[10px] font-bold">Connected (${snapshot.size} sessions)</span>`;
                 const list = document.getElementById('session-list');
                 list.innerHTML = '';
 
@@ -93,69 +112,68 @@
                     const id = docSnap.id;
                     const lastSeen = new Date(data.lastSeen);
                     const diffSeconds = (now - lastSeen) / 1000;
-
                     const isOnline = diffSeconds < 120;
 
                     const card = document.createElement('div');
-                    card.className = `p-4 rounded-xl border-2 flex flex-col gap-3 ${isOnline ? 'bg-slate-800 border-green-500/50' : 'bg-slate-900 border-gray-700 opacity-70'}`;
+                    card.className = `p-5 rounded-m3 flex flex-col gap-3 shadow-md ${isOnline ? 'bg-m3-surfaceHigh' : 'bg-m3-surface opacity-70'}`;
 
                     card.innerHTML = `
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="text-white font-bold text-lg">Display: ${id}</h3>
-                                <p class="text-xs text-gray-400 font-mono">${data.resolution} - ${data.userAgent.replace(/Mozilla.*?\)/, '')}</p>
+                                <p class="text-xs text-m3-secondary font-mono">${data.resolution} - ${data.userAgent.replace(/Mozilla.*?\)/, '')}</p>
                             </div>
-                            <span class="px-2 py-1 rounded text-xs font-bold ${isOnline ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                            <span class="px-2 py-1 rounded-full text-xs font-bold ${isOnline ? 'bg-[#A8C7FA] text-[#062E6F]' : 'bg-m3-error text-m3-onError'}">
                                 ${isOnline ? 'ONLINE' : 'OFFLINE'}
                             </span>
                         </div>
                         
-                        <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
-                            <div class="bg-black/30 p-2 rounded">
-                                <span class="text-gray-500 text-xs uppercase">View</span><br>
+                        <div class="grid grid-cols-2 gap-2 text-sm text-m3-secondary">
+                            <div class="bg-m3-surface p-3 rounded-m3-md">
+                                <span class="text-xs uppercase font-bold text-m3-onSecondary">View</span><br>
                                 ${data.currentView}
                             </div>
-                            <div class="bg-black/30 p-2 rounded">
-                                <span class="text-gray-500 text-xs uppercase">Screensaver</span><br>
+                            <div class="bg-m3-surface p-3 rounded-m3-md">
+                                <span class="text-xs uppercase font-bold text-m3-onSecondary">Screensaver</span><br>
                                 ${data.screensaver}
                             </div>
                         </div>
 
                         ${isOnline ? `
                         <div class="grid grid-cols-2 gap-2 mt-2">
-                            <button onclick="sendCommand('${id}', 'set_view:dashboard')" class="bg-blue-600 hover:bg-blue-500 text-white py-2 rounded text-sm font-bold">
-                                Show Dashboard
+                            <button onclick="sendCommand('${id}', 'set_view:dashboard')" class="bg-m3-primary text-m3-onPrimary hover:opacity-90 py-2.5 rounded-full text-sm font-bold shadow">
+                                Vis Dashboard
                             </button>
-                            <button onclick="sendCommand('${id}', 'set_view:tracker')" class="bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded text-sm font-bold">
-                                Show Tracker
+                            <button onclick="sendCommand('${id}', 'set_view:tracker')" class="bg-m3-primaryContainer text-m3-onPrimaryContainer hover:opacity-90 py-2.5 rounded-full text-sm font-bold shadow">
+                                Vis Tracker
                             </button>
-                            <button onclick="sendCommand('${id}', 'trigger_screensaver:cleaning')" class="col-span-2 bg-yellow-600 hover:bg-yellow-500 text-white py-2 rounded text-sm font-bold flex items-center justify-center gap-2">
-                                <span>🧹</span> Start Cleaning Mode (10m)
+                            <button onclick="sendCommand('${id}', 'trigger_screensaver:cleaning')" class="col-span-2 bg-[#F6BE00] text-[#4D3A00] hover:opacity-90 py-2.5 rounded-full text-sm font-bold flex items-center justify-center gap-2 shadow">
+                                <span>🧹</span> Rengjøringsmodus (10m)
                             </button>
-                            <button onclick="sendCommand('${id}', 'trigger_screensaver:night')" class="bg-purple-600 hover:bg-purple-500 text-white py-2 rounded text-sm font-bold">
-                                Force Night Mode
+                            <button onclick="sendCommand('${id}', 'trigger_screensaver:night')" class="bg-m3-secondaryContainer text-m3-onSecondaryContainer hover:opacity-90 py-2.5 rounded-full text-sm font-bold">
+                                Nattmodus
                             </button>
-                            <button onclick="sendCommand('${id}', 'trigger_screensaver:off')" class="bg-gray-600 hover:bg-gray-500 text-white py-2 rounded text-sm font-bold">
-                                Wake Up
+                            <button onclick="sendCommand('${id}', 'trigger_screensaver:off')" class="bg-m3-surface border border-m3-secondary text-m3-secondary hover:bg-m3-secondary hover:text-m3-onSecondary py-2.5 rounded-full text-sm font-bold transition">
+                                Våkne
                             </button>
                             
                             <!-- Image Overlay Controls -->
-                            <div class="col-span-2 border-t border-gray-700 pt-2 mt-1">
-                                <p class="text-xs text-center text-gray-500 mb-1">IMAGE OVERLAY</p>
+                            <div class="col-span-2 border-t border-[#4A4458] pt-3 mt-2">
+                                <p class="text-[10px] text-center text-m3-secondary mb-2 font-bold uppercase tracking-wider">BILDE OVERLAY</p>
                                 <div class="grid grid-cols-2 gap-2">
-                                    <button onclick="openImageModal('${id}')" class="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white py-2 rounded text-sm font-bold flex items-center justify-center gap-1">
+                                    <button onclick="openImageModal('${id}')" class="bg-gradient-to-r from-pink-500 to-rose-400 text-white hover:opacity-90 py-2.5 rounded-full text-sm font-bold flex items-center justify-center gap-1 shadow">
                                         <span>🖼️</span> Vis Bilde
                                     </button>
-                                     <button onclick="removeImage('${id}')" class="bg-red-900/50 hover:bg-red-900 text-red-200 py-2 rounded text-sm font-bold border border-red-900">
+                                     <button onclick="removeImage('${id}')" class="bg-m3-error text-m3-onError py-2.5 rounded-full text-sm font-bold hover:opacity-90">
                                         Fjern Bilde
                                     </button>
                                 </div>
-                                ${data.imageOverlay ? `<div class="text-[10px] text-green-400 text-center mt-1">Active: ${data.imageOverlay.duration === -1 ? 'Forever' : data.imageOverlay.duration + 's'}</div>` : ''}
+                                ${data.imageOverlay ? `<div class="text-[10px] text-green-400 text-center mt-2 font-bold">Aktiv Overlay: ${data.imageOverlay.duration === -1 ? 'Uendelig' : data.imageOverlay.duration + 's'}</div>` : ''}
                             </div>
                         </div>
                         ` : `
-                        <button onclick="deleteSession('${id}')" class="w-full bg-red-900/50 hover:bg-red-900 text-red-200 py-2 rounded text-sm">
-                            Remove Dead Session
+                        <button onclick="deleteSession('${id}')" class="w-full bg-m3-error/20 hover:bg-m3-error/40 text-m3-error py-3 rounded-full font-bold text-sm transition">
+                            Fjern Død Skjerm
                         </button>
                         `}
                     `;
@@ -163,7 +181,7 @@
                 });
 
                 if (list.innerHTML === '') {
-                    list.innerHTML = '<p class="text-gray-500 text-center py-10">No active sessions found.</p>';
+                    list.innerHTML = '<p class="text-m3-secondary text-center py-10">Ingen aktive skjermer funnet.</p>';
                 }
             });
         }
@@ -180,7 +198,7 @@
         }
 
         window.deleteSession = async function (sessionId) {
-            if (!confirm("Remove this session?")) return;
+            if (!confirm("Fjern denne skjermen?")) return;
             const ref = doc(db, 'artifacts', appId, 'sessions', sessionId);
             await deleteDoc(ref);
         }
@@ -298,42 +316,34 @@
     </script>
 </head>
 
-<body class="bg-slate-950 text-slate-200 min-h-screen relative overflow-x-hidden">
+<body class="bg-m3-bg text-m3-secondary min-h-screen relative overflow-x-hidden">
 
     <!-- LOGIN SCREEN -->
-    <div id="login-container" class="fixed inset-0 flex items-center justify-center p-4 bg-[#0B101E] z-[100] transition-opacity duration-500">
-        
-        <!-- Premium UI Background Elements (Matching Hub) -->
-        <div class="absolute top-[-10%] left-[-10%] w-96 h-96 bg-red-600/10 rounded-full mix-blend-screen filter blur-[128px] animate-pulse"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-purple-600/10 rounded-full mix-blend-screen filter blur-[128px] animate-pulse" style="animation-delay: 2s;"></div>
-
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl w-full max-w-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-10 relative backdrop-blur-md">
-            <!-- Back to Hub shortcut -->
-            <a href="index.html" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors" title="Tilbake til forsiden">
+    <div id="login-container" class="fixed inset-0 flex items-center justify-center p-4 bg-m3-bg z-[100] transition-opacity duration-500">
+        <div class="bg-m3-surfaceHigh p-10 rounded-m3 w-full max-w-sm shadow-[0_4px_12px_rgba(0,0,0,0.5)] z-10 relative">
+            <a href="index.html" class="absolute top-6 right-6 text-m3-secondary hover:text-white transition-colors" title="Tilbake til forsiden">
                 <i class="fa-solid fa-xmark text-xl"></i>
             </a>
 
             <div class="flex justify-center mb-6">
-                <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center shadow-[0_0_20px_rgba(239,68,68,0.2)]">
-                    <i class="fa-solid fa-lock text-3xl text-red-500"></i>
+                <div class="w-16 h-16 rounded-full bg-m3-primaryContainer flex items-center justify-center shadow-lg">
+                    <i class="fa-solid fa-lock text-3xl text-m3-onPrimaryContainer"></i>
                 </div>
             </div>
             
-            <h2 class="text-2xl font-black text-center text-white mb-2 tracking-tight">Admin Tilgang</h2>
-            <p class="text-slate-400 text-center text-sm mb-6">Logg inn for å få tilgang til skjermstyring</p>
+            <h2 class="text-3xl font-bold text-center text-white mb-2">Admin Tilgang</h2>
+            <p class="text-m3-secondary text-center text-sm mb-8">Logg inn for skjermstyring</p>
             
-            <form onsubmit="window.login(event)" class="space-y-4">
+            <form onsubmit="window.login(event)" class="space-y-5">
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1 ml-1 font-medium">E-postadresse</label>
-                    <input type="email" id="login-email" required placeholder="admin@example.com" class="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3.5 text-white focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition-all">
+                    <input type="email" id="login-email" required placeholder="E-postadresse" class="w-full bg-m3-surface border border-m3-secondaryContainer rounded-t-md rounded-b-md p-4 text-white focus:border-m3-primary focus:ring-1 focus:ring-m3-primary outline-none transition-all">
                 </div>
                 <div>
-                    <label class="block text-sm text-slate-400 mb-1 ml-1 font-medium">Passord</label>
-                    <input type="password" id="login-pass" required placeholder="••••••••" class="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3.5 text-white focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none transition-all">
+                    <input type="password" id="login-pass" required placeholder="Passord" class="w-full bg-m3-surface border border-m3-secondaryContainer rounded-t-md rounded-b-md p-4 text-white focus:border-m3-primary focus:ring-1 focus:ring-m3-primary outline-none transition-all">
                 </div>
-                <div id="login-error" class="bg-red-500/10 border border-red-500/20 text-red-400 text-sm hidden font-medium text-center p-3 rounded-lg"></div>
+                <div id="login-error" class="bg-m3-error text-m3-onError text-sm hidden font-bold text-center p-3 rounded-md"></div>
                 
-                <button type="submit" id="login-btn" class="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold py-3.5 rounded-xl transition-all mt-6 shadow-[0_0_15px_rgba(220,38,38,0.3)] hover:shadow-[0_0_25px_rgba(220,38,38,0.5)] transform hover:scale-[1.02]">
+                <button type="submit" id="login-btn" class="w-full bg-m3-primary hover:opacity-90 text-m3-onPrimary font-bold py-4 rounded-full transition-all mt-4 shadow-md">
                     Logg Inn
                 </button>
             </form>
@@ -341,73 +351,73 @@
     </div>
 
     <!-- MAIN CONTENT -->
-    <div id="main-content" class="max-w-4xl mx-auto p-6 hidden">
-        <header class="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
+    <div id="main-content" class="max-w-5xl mx-auto p-6 hidden">
+        <header class="flex items-center justify-between mb-8 pb-4 border-b border-[#4A4458]">
             <div class="flex items-center gap-4">
-                <a href="index.html" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-arrow-left text-slate-400 hover:text-white"></i>
+                <a href="index.html" class="w-12 h-12 rounded-full bg-m3-surfaceHigh hover:bg-m3-surface flex items-center justify-center transition-colors shadow-sm">
+                    <i class="fa-solid fa-arrow-left text-m3-secondary hover:text-white"></i>
                 </a>
                 <div>
-                    <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                        Control Center
+                    <h1 class="text-3xl font-bold text-white">
+                        Kontrollsenter
                     </h1>
-                    <div class="text-xs text-gray-500 font-medium tracking-wide">Holiday Tracker Admin Display</div>
+                    <div class="text-sm text-m3-primary font-medium tracking-wide">Info Screen Admin</div>
                 </div>
             </div>
             
             <div class="text-right">
                 <div id="auth-status" class="flex items-center justify-end font-medium">Laster...</div>
-                <div id="db-status" class="text-xs text-gray-400 mt-1">Waiting...</div>
+                <div id="db-status" class="text-xs mt-2 text-right flex justify-end">Waiting...</div>
             </div>
         </header>
 
         <div id="session-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Sessions go here -->
-            <div class="col-span-full text-center text-gray-500 animate-pulse font-medium py-12 bg-slate-900 border border-dashed border-slate-700 rounded-2xl">Laster inn skjermer...</div>
+            <div class="col-span-full text-center text-m3-secondary animate-pulse font-medium py-12 bg-m3-surfaceHigh rounded-m3">Laster inn skjermer...</div>
         </div>
     </div>
 
-    <!-- Image Modal (Admin Modals) -->
+    <!-- Image Modal -->
     <div id="image-modal"
         class="hidden fixed inset-0 bg-[#0B101E]/90 z-[200] items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-slate-900 border border-slate-700 p-8 rounded-2xl max-w-md w-full shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-            <h3 class="text-2xl font-bold text-white mb-6 tracking-tight">Last opp bilde til skjerm</h3>
+        <div class="bg-m3-surfaceHigh p-8 rounded-m3 max-w-md w-full shadow-2xl">
+            <h3 class="text-2xl font-bold text-white mb-6">Send Bilde til Skjerm</h3>
 
             <div class="space-y-6">
                 <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-2">Velg bilde</label>
+                    <label class="block text-sm font-bold text-m3-secondary mb-2">Velg bilde</label>
                     <input type="file" id="overlay-file" accept="image/*"
-                        class="w-full bg-slate-950/50 border border-slate-700/50 rounded-xl p-3 text-sm text-white focus:border-blue-500 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-slate-800 file:text-white hover:file:bg-slate-700">
+                        class="w-full bg-m3-surface border border-m3-secondaryContainer rounded-xl p-3 text-sm text-white focus:border-m3-primary outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-bold file:bg-m3-primary file:text-m3-onPrimary">
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-2">Varighet</label>
+                    <label class="block text-sm font-bold text-m3-secondary mb-2">Varighet</label>
                     <div class="grid grid-cols-4 gap-2">
                         <label class="cursor-pointer">
                             <input type="radio" name="duration" value="10" checked
                                 onchange="document.getElementById('overlay-duration').value=10" class="peer sr-only">
-                            <div class="bg-slate-800 peer-checked:bg-blue-600 peer-checked:text-white text-gray-400 py-2.5 rounded-lg text-center text-sm font-bold border border-slate-700/50 peer-checked:border-blue-500 transition-all hover:bg-slate-700">
+                            <div class="bg-m3-surface peer-checked:bg-m3-primaryContainer peer-checked:text-m3-onPrimaryContainer text-m3-secondary py-2.5 rounded-xl text-center text-sm font-bold border border-transparent transition-all">
                                 10s
                             </div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="duration" value="30"
                                 onchange="document.getElementById('overlay-duration').value=30" class="peer sr-only">
-                            <div class="bg-slate-800 peer-checked:bg-blue-600 peer-checked:text-white text-gray-400 py-2.5 rounded-lg text-center text-sm font-bold border border-slate-700/50 peer-checked:border-blue-500 transition-all hover:bg-slate-700">
+                            <div class="bg-m3-surface peer-checked:bg-m3-primaryContainer peer-checked:text-m3-onPrimaryContainer text-m3-secondary py-2.5 rounded-xl text-center text-sm font-bold border border-transparent transition-all">
                                 30s
                             </div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="duration" value="60"
                                 onchange="document.getElementById('overlay-duration').value=60" class="peer sr-only">
-                            <div class="bg-slate-800 peer-checked:bg-blue-600 peer-checked:text-white text-gray-400 py-2.5 rounded-lg text-center text-sm font-bold border border-slate-700/50 peer-checked:border-blue-500 transition-all hover:bg-slate-700">
+                            <div class="bg-m3-surface peer-checked:bg-m3-primaryContainer peer-checked:text-m3-onPrimaryContainer text-m3-secondary py-2.5 rounded-xl text-center text-sm font-bold border border-transparent transition-all">
                                 1m
                             </div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="duration" value="-1"
                                 onchange="document.getElementById('overlay-duration').value=-1" class="peer sr-only">
-                            <div class="bg-slate-800 peer-checked:bg-purple-600 peer-checked:text-white text-gray-400 py-2.5 rounded-lg text-center text-sm font-bold border border-slate-700/50 peer-checked:border-purple-500 transition-all hover:bg-slate-700">
+                            <div class="bg-m3-surface peer-checked:bg-m3-secondaryContainer peer-checked:text-m3-onSecondaryContainer text-m3-secondary py-2.5 rounded-xl text-center text-sm font-bold border border-transparent transition-all">
                                 ∞
                             </div>
                         </label>
@@ -416,30 +426,30 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-slate-400 mb-2">Tilpasning</label>
+                    <label class="block text-sm font-bold text-m3-secondary mb-2">Tilpasning</label>
                     <div class="grid grid-cols-2 gap-2">
                         <label class="cursor-pointer">
                             <input type="radio" name="fit" value="contain" class="peer sr-only">
-                            <div class="bg-slate-800 peer-checked:bg-indigo-600 peer-checked:text-white text-gray-400 py-3 rounded-lg text-center text-sm font-bold border border-slate-700/50 peer-checked:border-indigo-500 transition-all hover:bg-slate-700">
+                            <div class="bg-m3-surface peer-checked:bg-m3-primaryContainer peer-checked:text-m3-onPrimaryContainer text-m3-secondary py-3 rounded-xl text-center text-sm font-bold transition-all">
                                 Vis Hele
                             </div>
                         </label>
                         <label class="cursor-pointer">
                             <input type="radio" name="fit" value="cover" checked class="peer sr-only">
-                            <div class="bg-slate-800 peer-checked:bg-indigo-600 peer-checked:text-white text-gray-400 py-3 rounded-lg text-center text-sm font-bold border border-slate-700/50 peer-checked:border-indigo-500 transition-all hover:bg-slate-700">
+                            <div class="bg-m3-surface peer-checked:bg-m3-primaryContainer peer-checked:text-m3-onPrimaryContainer text-m3-secondary py-3 rounded-xl text-center text-sm font-bold transition-all">
                                 Fyll Skjerm
                             </div>
                         </label>
                     </div>
                 </div>
 
-                <div class="flex gap-3 mt-8 pt-4 border-t border-slate-800">
+                <div class="flex gap-3 mt-8 pt-4 border-t border-[#4A4458]">
                     <button onclick="closeImageModal()"
-                        class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3.5 rounded-xl font-bold transition-colors">
+                        class="flex-1 bg-transparent border border-m3-secondary text-m3-secondary hover:bg-m3-secondary hover:text-m3-onSecondary py-3.5 rounded-full font-bold transition-colors">
                         Avbryt
                     </button>
                     <button id="btn-send-image" onclick="uploadAndSend()"
-                        class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)]">
+                        class="flex-1 bg-m3-primary text-m3-onPrimary hover:opacity-90 py-3.5 rounded-full font-bold transition-all shadow-md">
                         Send til Skjerm
                     </button>
                 </div>

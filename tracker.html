@@ -6,21 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juleferie Oversikt - Live</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        m3: {
+                            bg: '#141218',
+                            surface: '#211F26', 
+                            surfaceHigh: '#2B2930', 
+                            primary: '#D0BCFF',
+                            onPrimary: '#381E72',
+                            primaryContainer: '#4F378B',
+                            onPrimaryContainer: '#EADDFF',
+                            secondary: '#CCC2DC',
+                            onSecondary: '#332D41',
+                            error: '#FFB4AB',
+                            onError: '#690005'
+                        }
+                    },
+                    fontFamily: { sans: ['Roboto', 'sans-serif'], },
+                    borderRadius: { 'm3': '28px', 'm3-md': '16px' }
+                }
+            }
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:wght@400;700;800&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <style>
         body {
-            font-family: 'Nunito', sans-serif;
-            background: radial-gradient(circle at center, #2e3440 0%, #242933 100%);
+            font-family: 'Roboto', sans-serif;
+            background-color: #141218; /* M3 bg */
             margin: 0;
             overflow: hidden;
             height: 100vh;
-        }
-
-        .christmas-font {
-            font-family: 'Mountains of Christmas', cursive;
         }
 
         .fade-in {
@@ -50,71 +72,69 @@
     </style>
 </head>
 
-<body class="flex flex-col h-full">
+<body class="flex flex-col h-full bg-m3-bg text-m3-secondary">
 
     <canvas id="snow-canvas" class="fixed inset-0 pointer-events-none z-10 hidden"></canvas>
 
-    <!-- Main Content -->
+    <!-- Main Content: Tracker -->
     <div
-        class="flex-grow flex flex-col items-center justify-center p-4 pb-32 relative z-10 w-full max-w-[95%] mx-auto overflow-y-auto h-full scrollbar-hide">
+        class="flex-grow flex flex-col items-center justify-center p-6 pb-32 relative z-10 w-full max-w-[95%] mx-auto overflow-y-auto h-full scrollbar-hide">
         <header class="text-center mb-8 shrink-0">
-            <h1 class="text-5xl md:text-6xl text-yellow-300 christmas-font drop-shadow-lg font-bold">
-                🎄 Juleferie 2025 🎄
+            <h1 id="tracker-title" class="text-5xl md:text-6xl text-m3-primary font-bold tracking-tight drop-shadow">
+                Ferieoversikt
             </h1>
-            <p class="text-blue-200 mt-2 text-lg">God jul til hele gjengen!</p>
+            <p class="text-m3-secondary mt-2 text-lg font-medium">God ferie til alle som har!</p>
         </header>
 
         <div id="employee-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 w-full fade-in shrink-0">
-            <div class="col-span-full text-center text-white/50 animate-pulse">Laster ferieoversikt...</div>
+            <div class="col-span-full text-center text-m3-secondary animate-pulse">Laster ferieoversikt...</div>
         </div>
 
         <div id="pagination-dots" class="flex justify-center mt-6 h-4 shrink-0"></div>
     </div>
 
-    <!-- QR Code -->
+    <!-- Small Floating QR Code -->
     <div
-        class="fixed bottom-6 left-6 z-50 bg-[#2e3440]/80 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-[#4c566a]/50 hover:bg-[#2e3440] transition-colors group">
+        class="fixed bottom-6 left-6 z-50 bg-m3-surfaceHigh/80 backdrop-blur-md p-3 rounded-m3-md shadow-[0_8px_20px_rgba(0,0,0,0.5)] border border-m3-primaryContainer hover:bg-m3-surfaceHigh transition-colors group">
         <div class="flex flex-col items-center gap-2">
-            <div id="qrcode" class="bg-white p-2 rounded-xl"></div>
+            <div id="qrcode" class="bg-white p-1 rounded-lg shadow-inner"></div>
             <span
-                class="text-[#d8dee9] text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-[#3b4252] px-2 py-1 rounded shadow-lg border border-[#4c566a]">
-                Scan meg
+                class="text-m3-secondary text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-m3-surface px-2 py-1 rounded shadow-lg border border-[#4A4458]">
+                Registrer deg
             </span>
         </div>
     </div>
 
     <!-- Image Overlay -->
-    <div id="overlay-container" class="hidden fixed inset-0 z-[10000] bg-black flex items-center justify-center">
+    <div id="overlay-container" class="hidden fixed inset-0 z-[10000] bg-m3-bg flex items-center justify-center">
         <img id="overlay-image" src="" class="w-full h-full object-cover">
     </div>
 
     <!-- Dashboard View -->
-    <div id="dashboard-view" class="hidden fixed inset-0 bg-[#2e3440] z-50 flex flex-col font-sans text-[#eceff4]">
+    <div id="dashboard-view" class="hidden fixed inset-0 bg-m3-bg z-50 flex flex-col font-sans text-m3-secondary">
         <div id="comic-grid"
-            class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2 p-2 overflow-y-auto w-full max-w-[1800px] mx-auto scroll-smooth no-scrollbar">
-            <div class="col-span-full flex flex-col items-center justify-center h-full text-[#4c566a] animate-pulse">
-                <span class="text-lg font-medium">Laster inn striper...</span>
+            class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-y-auto w-full max-w-[1800px] mx-auto scroll-smooth no-scrollbar">
+            <div class="col-span-full flex flex-col items-center justify-center h-full text-m3-secondary animate-pulse">
+                <span class="text-lg font-bold">Laster inn striper...</span>
             </div>
         </div>
-        <div
-            class="min-h-[100px] bg-[#3b4252] border-t border-[#4c566a] flex items-center justify-between px-8 py-4 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.3)] z-20 relative">
+        <div class="min-h-[100px] bg-m3-surfaceHigh border-t border-[#4A4458] flex items-center justify-between px-8 py-4 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.3)] z-20 relative">
             <div class="flex-grow flex justify-start w-3/5 pr-4">
-                <p id="dash-quote"
-                    class="text-lg md:text-xl text-[#d8dee9] italic text-left leading-normal whitespace-nowrap truncate border-l-4 border-[#5e81ac] pl-6 py-2">
-                    "Loading wisdom..."</p>
+                <p id="dash-quote" class="text-lg md:text-xl text-m3-secondary italic text-left leading-normal whitespace-nowrap truncate border-l-4 border-m3-primary pl-6 py-2">
+                    "Laster inspirasjon..."
+                </p>
             </div>
-            <div class="flex items-center justify-end gap-4 w-1/5 min-w-[150px]">
-                <div id="dash-clock" class="text-4xl font-mono font-bold text-[#eceff4] tracking-wider">00:00</div>
-                <div id="connection-status"
-                    class="w-3 h-3 rounded-full bg-[#bf616a] shadow-[0_0_10px_rgba(191,97,106,0.7)] transition-colors duration-500">
+            <div class="flex items-center justify-end gap-5 w-1/5 min-w-[150px]">
+                <div id="dash-clock" class="text-5xl font-mono font-bold text-white tracking-tight">00:00</div>
+                <div id="connection-status" class="w-4 h-4 rounded-full bg-m3-error shadow-[0_0_12px_rgba(255,180,171,0.7)] transition-colors duration-500">
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Screensaver Bouncer -->
-    <div id="screensaver" class="hidden fixed inset-0 z-[5000] bg-black cursor-none">
-        <div id="screensaver-bouncer" class="absolute text-6xl select-none" style="top:50%;left:50%">🎄</div>
+    <div id="screensaver" class="hidden fixed inset-0 z-[5000] bg-m3-bg cursor-none">
+        <div id="screensaver-bouncer" class="absolute text-6xl select-none" style="top:50%;left:50%">🎅</div>
     </div>
 
     <!-- Logic -->
@@ -155,7 +175,7 @@
         window.addEventListener('load', async () => {
             // UI Debug
             const disp = document.createElement('div');
-            disp.className = "fixed bottom-1 right-1 text-[10px] text-white/80 font-mono pointer-events-none z-[200] mix-blend-difference flex flex-col items-end bg-black/50 p-1 rounded";
+            disp.className = "fixed bottom-1 right-1 text-[10px] text-white/80 font-mono pointer-events-none z-[200] mix-blend-difference flex flex-col items-end bg-black/50 p-1 rounded hidden";
             disp.innerHTML = `<div id="fb-status" class="font-bold">Init...</div><div class="text-white/50">${sessionId}</div>`;
             document.body.appendChild(disp);
 
@@ -163,9 +183,15 @@
             window.Screensaver.init();
             Dashboard.init();
 
-            // Generate QR
+            // Generate Tiny QR Code
             const baseUrl = window.location.href.endsWith('/') ? window.location.href : window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
-            new QRCode(document.getElementById("qrcode"), { text: baseUrl + 'register.html', width: 64, height: 64 });
+            new QRCode(document.getElementById("qrcode"), { 
+                text: baseUrl + 'register.html', 
+                width: 72, 
+                height: 72, 
+                colorDark: "#211F26", 
+                colorLight: "#ffffff" 
+            });
 
             // Auth
             try {
@@ -181,22 +207,17 @@
             if (user) {
                 updateStatus("Connected", "#4ade80");
                 startHeartbeat();
-                // Only load holiday data if there is an active season
-                if (getSeason()) {
-                    startDataListener();
-                } else {
-                    console.log("No Holiday Season - Data Load Skipped");
-                }
+                // Always start data listener to control rotation logic
+                startDataListener();
             } else {
                 updateStatus("No Auth", "orange");
             }
         });
 
-        // Heartbeat (Writes to Firebase)
+        // Heartbeat
         function startHeartbeat() {
             const sessionRef = doc(db, 'artifacts', appId, 'sessions', sessionId);
 
-            // Listen for Commands
             onSnapshot(sessionRef, (snap) => {
                 if (!snap.exists()) return;
                 const data = snap.data();
@@ -208,7 +229,6 @@
                 else hideImageOverlay();
             });
 
-            // Write Heartbeat
             const beat = async () => {
                 try {
                     await setDoc(sessionRef, {
@@ -218,7 +238,6 @@
                         currentView: document.getElementById('dashboard-view').classList.contains('hidden') ? 'tracker' : 'dashboard',
                         screensaver: window.Screensaver.active ? window.Screensaver.mode : 'off'
                     }, { merge: true });
-                    // updateStatus("Heartbeat", "#4ade80"); // Too noisy
                 } catch (e) {
                     updateStatus("HB Fail", "red");
                 }
@@ -227,18 +246,16 @@
             setInterval(beat, 30000);
         }
 
-        // Data Listener
+        // Data Listener & Rotation Logic
+        let toggleInterval;
+
         function startDataListener() {
             const currentSeason = getSeason() || 'winter';
             applySeasonTheme(currentSeason);
 
-            // Determine View
-            if (!getSeason()) {
-                document.getElementById('dashboard-view').classList.remove('hidden');
-                document.getElementById('dashboard-view').classList.add('flex');
-            }
-
+            // Query items
             const q = query(collection(db, 'artifacts', appId, 'public', 'data', currentSeason));
+
             onSnapshot(q, (snap) => {
                 const items = [];
                 snap.forEach(d => items.push({ id: d.id, ...d.data() }));
@@ -249,20 +266,48 @@
 
                 items.forEach(async (item) => {
                     if (item.endDate && item.endDate < todayStr) {
-                        console.log("Deleting expired:", item.name, item.endDate);
-                        try {
-                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', currentSeason, item.id));
-                        } catch (e) { console.error("Cleanup fail", e); }
+                        try { await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', currentSeason, item.id)); } 
+                        catch (e) { console.error("Cleanup fail", e); }
                     }
                 });
 
-                // Simple sort logic
+                // Sort items by startDate
                 items.sort((a, b) => (a.startDate || '').localeCompare(b.startDate || ''));
                 renderGrid(items);
+
+                // Check active holidays
+                const hasActiveHolidays = items.length > 0;
+                
+                // Rotation logic
+                clearInterval(toggleInterval);
+
+                if (hasActiveHolidays) {
+                    // Activate 5 minute rotation
+                    let showingTracker = false; // Start with Dashboard
+                    
+                    document.getElementById('dashboard-view').classList.remove('hidden');
+                    document.getElementById('dashboard-view').classList.add('flex');
+
+                    toggleInterval = setInterval(() => {
+                        showingTracker = !showingTracker;
+                        if (showingTracker) {
+                            // Show Tracker (Hide Dashboard)
+                            document.getElementById('dashboard-view').classList.add('hidden');
+                            document.getElementById('dashboard-view').classList.remove('flex');
+                        } else {
+                            // Show Dashboard (Hide Tracker)
+                            document.getElementById('dashboard-view').classList.remove('hidden');
+                            document.getElementById('dashboard-view').classList.add('flex');
+                        }
+                    }, 5 * 60 * 1000); // 5 minutes (300,000 ms)
+                } else {
+                    // Always show Dashboard
+                    document.getElementById('dashboard-view').classList.remove('hidden');
+                    document.getElementById('dashboard-view').classList.add('flex');
+                }
             });
         }
 
-        // --- Helpers ---
         function getSeason() {
             const d = new Date();
             const m = d.getMonth(), day = d.getDate();
@@ -271,31 +316,50 @@
             if (m === 3 && day <= 22) return 'spring';
             if ((m === 5 && day >= 20) || m === 6 || (m === 7 && day <= 18)) return 'summer';
             if ((m === 8 && day >= 28) || (m === 9 && day <= 10)) return 'autumn';
-            return null;
+            return 'winter';
         }
 
         function createCard(emp) {
-            // Simplified Card Logic for robustness
             const div = document.createElement('div');
-            div.className = "bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-xl text-white flex flex-col justify-between min-h-[200px]";
-            // ... (Insert rich card logic if needed, keeping simple for fix)
+            // M3 Color logic based on user selection or fallback
+            let primaryColor = '#D0BCFF'; 
+            let onPrimaryColor = '#381E72';
+            const colorsMap = {
+                red: { p: '#FFB4AB', on: '#690005' },
+                pink: { p: '#FFB1C8', on: '#650033' },
+                blue: { p: '#A8C7FA', on: '#062E6F' },
+                green: { p: '#93D78C', on: '#00390B' },
+                purple: { p: '#D0BCFF', on: '#381E72' },
+                orange: { p: '#FFB599', on: '#5A1A00' },
+                yellow: { p: '#E4C936', on: '#3A3000' },
+                teal: { p: '#55D6F3', on: '#003642' }
+            };
+
+            if (emp.color && colorsMap[emp.color]) {
+                primaryColor = colorsMap[emp.color].p;
+                onPrimaryColor = colorsMap[emp.color].on;
+            }
+
+            div.className = "bg-m3-surfaceHigh p-6 rounded-m3 border border-[#4A4458] shadow-md flex flex-col justify-between min-h-[220px] relative overflow-hidden";
             div.innerHTML = `
-                <div class="absolute -top-3 -right-3 bg-red-500 rounded-full w-10 h-10 flex items-center justify-center text-xl shadow-lg border-2 border-white">🎄</div>
+                <div class="absolute -top-4 -right-4 w-16 h-16 rounded-full flex items-center justify-center text-3xl shadow-lg border-4 border-m3-bg transition-transform" style="background-color: ${primaryColor}; color: ${onPrimaryColor}">
+                    ${emp.emoji || '🏝️'}
+                </div>
                 <div>
-                   <h2 class="text-2xl font-bold mb-1">${emp.name}</h2>
-                   <p class="text-white/70 text-sm font-semibold uppercase">Ferie</p>
-                   <div class="mt-4 space-y-2">
-                       <div class="bg-black/20 p-2 rounded">
-                           <p class="text-xs text-white/50 uppercase">Start</p>
-                           <p class="font-bold">${emp.startDate}</p>
+                   <h2 class="text-2xl font-bold mb-1 text-white">${emp.name}</h2>
+                   <p class="text-[10px] font-bold uppercase tracking-wider text-m3-secondary">Ferie / Fravær</p>
+                   <div class="mt-6 space-y-3">
+                       <div class="bg-m3-surface p-3 rounded-m3-md border border-[#4A4458]/50">
+                           <p class="text-[10px] uppercase font-bold text-m3-secondary mb-1 tracking-wider">Fra og med</p>
+                           <p class="font-bold text-lg text-white">${emp.startDate}</p>
                        </div>
-                       <div class="bg-black/20 p-2 rounded">
-                           <p class="text-xs text-white/50 uppercase">Slutt</p>
-                           <p class="font-bold">${emp.endDate}</p>
+                       <div class="bg-m3-surface p-3 rounded-m3-md border border-[#4A4458]/50">
+                           <p class="text-[10px] uppercase font-bold text-m3-secondary mb-1 tracking-wider">Til og med</p>
+                           <p class="font-bold text-lg text-white">${emp.endDate}</p>
                        </div>
                    </div>
                 </div>
-                <button onclick="window.deleteItem('${emp.id}')" class="mt-2 text-xs text-red-300 hover:text-red-100 text-right w-full">Slett</button>
+                <!-- Delete removed from live view for safety, only in Admin -->
             `;
             return div;
         }
@@ -303,23 +367,36 @@
         function renderGrid(employees) {
             const grid = document.getElementById('employee-grid');
             grid.innerHTML = '';
-            if (employees.length === 0) grid.innerHTML = '<div class="col-span-full text-center text-white/50">Ingen data</div>';
+            if (employees.length === 0) grid.innerHTML = '<div class="col-span-full text-center text-m3-secondary font-bold">Ingen aktive ferier lagret akkurat nå.</div>';
             employees.forEach(e => grid.appendChild(createCard(e)));
         }
 
         function applySeasonTheme(season) {
-            // Minimal theme logic
             const themes = {
-                christmas: { title: "Juleferie", bg: "radial-gradient(circle at center, #2d3748 0%, #1a202c 100%)" },
-                winter: { title: "Vinterferie", bg: "radial-gradient(circle at center, #e0f2fe 0%, #0284c7 100%)" },
+                christmas: "Juleferie 🎄",
+                winter: "Vinterferie ⛷️",
+                spring: "Påskeferie 🐣",
+                summer: "Sommerferie ☀️",
+                autumn: "Høstferie 🍂"
             };
-            const theme = themes[season] || themes.christmas;
-            document.body.style.background = theme.bg;
-            document.querySelector('header h1').innerText = "🎄 " + theme.title + " 🎄";
+            const title = themes[season] || "Ferieoversikt";
+            document.getElementById('tracker-title').innerText = title;
         }
 
         function handleCommand(cmd) {
             if (cmd === 'reload') window.location.reload();
+            if (cmd.startsWith('set_view')) {
+                // Admin override: Cancel rotation temporarily to force view
+                clearInterval(toggleInterval);
+                const view = cmd.split(':')[1];
+                if (view === 'dashboard') {
+                    document.getElementById('dashboard-view').classList.remove('hidden');
+                    document.getElementById('dashboard-view').classList.add('flex');
+                } else {
+                    document.getElementById('dashboard-view').classList.add('hidden');
+                    document.getElementById('dashboard-view').classList.remove('flex');
+                }
+            }
             if (cmd.startsWith('trigger_screensaver')) {
                 const mode = cmd.split(':')[1];
                 mode === 'off' ? window.stopScreensaver() : window.startScreensaver(mode);
@@ -332,32 +409,23 @@
             document.getElementById('overlay-container').classList.remove('hidden');
             const img = document.getElementById('overlay-image');
             if (img.src !== data.url) img.src = data.url;
-
-            // Apply Fit Mode
             img.className = "w-full h-full " + (data.fit === 'contain' ? 'object-contain' : 'object-cover');
 
             if (data.duration !== -1) {
                 clearTimeout(overlayTimeout);
-                let remaining = data.duration; // Simple duration or calc elapsed
-                // Just reset timer on every update for simplicity or calc
                 overlayTimeout = setTimeout(() => {
                     hideImageOverlay();
                     updateDoc(ref, { imageOverlay: null });
-                }, remaining * 1000);
+                }, data.duration * 1000);
             }
         }
         function hideImageOverlay() {
             document.getElementById('overlay-container').classList.add('hidden');
         }
 
-        // Globals for existing onclicks
-        window.deleteItem = async (id) => {
-            if (confirm('Slett?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', getSeason() || 'winter', id));
-        };
         window.startScreensaver = (mode) => window.Screensaver.start(mode);
         window.stopScreensaver = () => window.Screensaver.stop();
 
-        // Sub-modules
         window.Screensaver = {
             active: false, mode: 'night',
             init: function () { this.el = document.getElementById('screensaver'); },
@@ -376,18 +444,17 @@
             },
 
             startClock: function () {
+                const el = document.getElementById('dash-clock');
                 setInterval(() => {
-                    document.getElementById('dash-clock').innerText = new Date().toLocaleTimeString('nb-NO').slice(0, 5);
+                    el.innerText = new Date().toLocaleTimeString('nb-NO').slice(0, 5);
                 }, 1000);
             },
 
             connectWS: function () {
                 const url = `wss://ncd.idmedia.no/ws/${this.clientId}`;
-                console.log('Connecting WS:', url);
                 this.ws = new WebSocket(url);
 
                 this.ws.onopen = () => {
-                    console.log('WS Open');
                     this.updateStatus(true);
                     this.reconnectDelay = 5000;
                 };
@@ -396,11 +463,10 @@
                     try {
                         const data = JSON.parse(e.data);
                         if (data.event === 'update') this.updateContent(data.data);
-                    } catch (err) { console.error('WS Data Err', err); }
+                    } catch (err) {}
                 };
 
                 this.ws.onclose = () => {
-                    console.log('WS Closed');
                     this.updateStatus(false);
                     setTimeout(() => this.connectWS(), this.reconnectDelay);
                     this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
@@ -410,7 +476,7 @@
             updateStatus: function (ok) {
                 const el = document.getElementById('connection-status');
                 if (el) {
-                    el.className = `w-3 h-3 rounded-full transition-colors duration-500 shadow-[0_0_10px_rgba(0,0,0,0.5)] ${ok ? 'bg-green-500 shadow-green-500/50' : 'bg-red-500 shadow-red-500/50'}`;
+                    el.className = `w-4 h-4 rounded-full transition-colors duration-500 shadow-md ${ok ? 'bg-[#93D78C] shadow-[#93D78C]/50' : 'bg-m3-error shadow-m3-error/50'}`;
                 }
             },
 
@@ -418,27 +484,21 @@
                 // Quotes
                 if (data.quotes && data.quotes.sadserver) {
                     const raw = data.quotes.sadserver;
-                    // Flatten text (remove newlines), clean spaces
                     let clean = raw.replace(/\n/g, " ").replace(/\s+/g, " ").trim();
 
-                    // Extract attribution if present (assuming - @sadserver format)
                     let text = clean;
                     let author = "- @sadserver";
-
-                    // Simple split if it exists in the text
                     const splitIdx = clean.toLowerCase().lastIndexOf("- @sadserver");
                     if (splitIdx > -1) {
                         text = clean.substring(0, splitIdx).trim();
                         author = clean.substring(splitIdx).trim();
                     }
 
-                    // HTML structuring: Text on one line (truncated), Author on next
                     const el = document.getElementById('dash-quote');
-                    // Reset classes for this layout
-                    el.className = "text-[#d8dee9] border-l-4 border-[#5e81ac] pl-6 py-1";
+                    el.className = "text-m3-secondary border-l-4 border-m3-primary pl-6 py-2";
                     el.innerHTML = `
-                        <div class="text-lg md:text-xl italic whitespace-nowrap overflow-hidden text-ellipsis leading-tight">"${text}"</div>
-                        <div class="text-sm font-bold text-white/80 mt-1">${author}</div>
+                        <div class="text-xl md:text-2xl font-medium whitespace-nowrap overflow-hidden text-ellipsis leading-tight text-white/90">"${text}"</div>
+                        <div class="text-sm font-bold text-m3-primary mt-2">${author}</div>
                     `;
                 }
 
@@ -459,22 +519,14 @@
                         list.forEach(imgData => {
                             let url = imgData.url.startsWith('/') ? 'https://ncd.idmedia.no' + imgData.url : imgData.url;
                             const div = document.createElement('div');
-                            div.className = "w-full h-full bg-[#3b4252]/50 rounded-lg shadow-sm border border-[#4c566a] p-2 flex items-center justify-center";
-                            div.innerHTML = `<img src="${url}" class="w-full h-full object-contain max-h-full">`;
+                            div.className = "w-full h-full bg-m3-surface rounded-m3-md shadow-sm border border-[#4A4458] p-3 flex items-center justify-center";
+                            div.innerHTML = `<img src="${url}" class="w-full h-full object-contain max-h-full rounded-sm">`;
                             grid.appendChild(div);
                         });
                     });
                 }
             }
         };
-
-        // --- Init Overrides ---
-        // Ensure Dashboard is Default
-        window.addEventListener('load', () => {
-            // Force Dashboard Visible Immediately
-            document.getElementById('dashboard-view').classList.remove('hidden');
-            document.getElementById('dashboard-view').classList.add('flex');
-        });
 
     </script>
 </body>
