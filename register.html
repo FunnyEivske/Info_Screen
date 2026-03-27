@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrer Ferie</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:wght@400;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Config & Init ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOcFfiRIw3sgU9eqEbwc1uc_Ur1aTOJXk",
+            authDomain: "ferie-805e0.firebaseapp.com",
+            projectId: "ferie-805e0",
+            storageBucket: "ferie-805e0.firebasestorage.app",
+            messagingSenderId: "621338557882",
+            appId: "1:621338557882:web:9eae6887a484db316d7183",
+            measurementId: "G-C8PT9DKJ3Q"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'holiday-tracker-main';
+
+        async function initApp() {
+            try {
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Auth error", error);
+            }
+        }
+
+        // --- Seasonal Logic (For correct data collection) ---
+        function getSeason() {
+            const date = new Date();
+            const month = date.getMonth(); // 0-11
+            const day = date.getDate();
+
+            // Jul: 1. Desember - 5. Januar
+            if (month === 11 || (month === 0 && day <= 5)) {
+                return 'christmas';
+            }
+            // Vinterferie (Agder: Uke 8): Ca. 15. Februar - 1. Mars
+            if (month === 1 && day >= 15 && day <= 28) {
+                return 'winter';
+            }
+            // Påske/Vår: 1. April - 22. April
+            if (month === 3 && day <= 22) {
+                return 'spring';
+            }
+            // Sommer (Skoleferie): ca 20. Juni - 18. August
+            if ((month === 5 && day >= 20) || month === 6 || (month === 7 && day <= 18)) {
+                return 'summer';
+            }
+            // Høst (Agder: Uke 40): Ca 28. September - 10. Oktober
+            if ((month === 8 && day >= 28) || (month === 9 && day <= 10)) {
+                return 'autumn';
+            }
+
+            return 'christmas'; // Fallback if no specific season, or default to generic 'winter'
+        }
+
+        // --- Form Submission ---
+        window.submitForm = async function (e) {
+            e.preventDefault();
+            const name = document.getElementById('input-name').value;
+            const color = document.getElementById('selected-color').value;
+            const emoji = document.getElementById('selected-emoji').value;
+            const startDate = document.getElementById('input-start').value;
+            const endDate = document.getElementById('input-end').value;
+
+            if (!name || !startDate || !endDate) return;
+
+            const btn = document.getElementById('submit-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "Lagrer...";
+            btn.disabled = true;
+
+            try {
+                const currentSeason = getSeason() || 'christmas'; // Ensure we have a collection
+                const col = collection(db, 'artifacts', appId, 'public', 'data', currentSeason);
+                await addDoc(col, { name, color, emoji, startDate, endDate });
+
+                // Success UI
+                document.getElementById('form-container').classList.add('hidden');
+                document.getElementById('success-message').classList.remove('hidden');
+                document.getElementById('vacation-form').reset();
+            } catch (err) {
+                alert("Kunne ikke lagre: " + err.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- UI Logic ---
+        window.selectColor = function (color) {
+            document.getElementById('selected-color').value = color;
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                if (btn.dataset.color === color) {
+                    btn.classList.add('ring-4', 'ring-offset-2', 'ring-gray-400', 'scale-110');
+                } else {
+                    btn.classList.remove('ring-4', 'ring-offset-2', 'ring-gray-400', 'scale-110');
+                }
+            });
+        }
+
+        window.selectEmoji = function (emoji) {
+            document.getElementById('selected-emoji').value = emoji;
+            document.querySelectorAll('.emoji-btn').forEach(btn => {
+                if (btn.dataset.emoji === emoji) {
+                    btn.classList.add('bg-blue-100', 'border-blue-500', 'scale-110');
+                    btn.classList.remove('border-transparent');
+                } else {
+                    btn.classList.remove('bg-blue-100', 'border-blue-500', 'scale-110');
+                    btn.classList.add('border-transparent');
+                }
+            });
+        }
+
+        window.resetForm = function () {
+            document.getElementById('success-message').classList.add('hidden');
+            document.getElementById('form-container').classList.remove('hidden');
+            window.selectColor('red');
+            window.selectEmoji('🎅');
+        }
+
+        initApp();
+        // Init Selection
+        window.addEventListener('load', () => {
+            window.selectColor('red');
+            window.selectEmoji('🎅');
+        });
+
+    </script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #2e3440 0%, #242933 100%);
+            color: #eceff4;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="form-container"
+        class="bg-[#3b4252] rounded-2xl w-full max-w-lg p-6 relative shadow-2xl border-4 border-[#5e81ac] max-h-[90vh] overflow-y-auto no-scrollbar">
+        <h2 class="text-3xl font-bold text-[#eceff4] mb-6 text-center">🎅 Når tar du ferie?</h2>
+
+        <form id="vacation-form" onsubmit="submitForm(event)" class="space-y-6">
+            <!-- Navn -->
+            <div>
+                <label class="block text-sm font-bold text-[#d8dee9] mb-1">Ditt Navn</label>
+                <input type="text" id="input-name" required placeholder="F.eks. Kari Nordmann"
+                    class="w-full p-3 bg-[#2e3440] border border-[#4c566a] rounded-lg text-[#eceff4] focus:ring-2 focus:ring-[#88c0d0] outline-none placeholder-[#4c566a]">
+            </div>
+
+            <!-- Fargevelger -->
+            <div>
+                <label class="block text-sm font-bold text-[#d8dee9] mb-2">Velg din stil</label>
+                <input type="hidden" id="selected-color" value="red">
+                <div class="flex flex-wrap gap-3 justify-center">
+                    <button type="button" data-color="red" onclick="selectColor('red')"
+                        class="color-btn w-10 h-10 rounded-full bg-red-500 shadow-md hover:scale-110 transition"></button>
+                    <button type="button" data-color="pink" onclick="selectColor('pink')"
+                        class="color-btn w-10 h-10 rounded-full bg-pink-500 shadow-md hover:scale-110 transition"></button>
+                    <button type="button" data-color="blue" onclick="selectColor('blue')"
+                        class="color-btn w-10 h-10 rounded-full bg-blue-500 shadow-md hover:scale-110 transition"></button>
+                    <button type="button" data-color="green" onclick="selectColor('green')"
+                        class="color-btn w-10 h-10 rounded-full bg-green-500 shadow-md hover:scale-110 transition"></button>
+                    <button type="button" data-color="purple" onclick="selectColor('purple')"
+                        class="color-btn w-10 h-10 rounded-full bg-purple-500 shadow-md hover:scale-110 transition"></button>
+                    <button type="button" data-color="orange" onclick="selectColor('orange')"
+                        class="color-btn w-10 h-10 rounded-full bg-orange-500 shadow-md hover:scale-110 transition"></button>
+                    <button type="button" data-color="yellow" onclick="selectColor('yellow')"
+                        class="color-btn w-10 h-10 rounded-full bg-yellow-400 shadow-md hover:scale-110 transition"></button>
+                    <button type="button" data-color="teal" onclick="selectColor('teal')"
+                        class="color-btn w-10 h-10 rounded-full bg-teal-500 shadow-md hover:scale-110 transition"></button>
+                </div>
+            </div>
+
+            <!-- Emoji Velger -->
+            <div>
+                <label class="block text-sm font-bold text-[#d8dee9] mb-2">Velg ikon</label>
+                <input type="hidden" id="selected-emoji" value="🎅">
+                <div class="grid grid-cols-6 gap-2">
+                    <button type="button" data-emoji="🎅" onclick="selectEmoji('🎅')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🎅</button>
+                    <button type="button" data-emoji="🎄" onclick="selectEmoji('🎄')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🎄</button>
+                    <button type="button" data-emoji="❄️" onclick="selectEmoji('❄️')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">❄️</button>
+                    <button type="button" data-emoji="🎁" onclick="selectEmoji('🎁')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🎁</button>
+                    <button type="button" data-emoji="⛷️" onclick="selectEmoji('⛷️')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">⛷️</button>
+                    <button type="button" data-emoji="🏂" onclick="selectEmoji('🏂')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🏂</button>
+                    <button type="button" data-emoji="🏖️" onclick="selectEmoji('🏖️')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🏖️</button>
+                    <button type="button" data-emoji="✈️" onclick="selectEmoji('✈️')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">✈️</button>
+                    <button type="button" data-emoji="🎮" onclick="selectEmoji('🎮')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🎮</button>
+                    <button type="button" data-emoji="🍷" onclick="selectEmoji('🍷')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🍷</button>
+                    <button type="button" data-emoji="💤" onclick="selectEmoji('💤')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">💤</button>
+                    <button type="button" data-emoji="🕯️" onclick="selectEmoji('🕯️')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🕯️</button>
+                    <button type="button" data-emoji="☃️" onclick="selectEmoji('☃️')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">☃️</button>
+                    <button type="button" data-emoji="🦌" onclick="selectEmoji('🦌')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🦌</button>
+                    <button type="button" data-emoji="🌟" onclick="selectEmoji('🌟')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🌟</button>
+                    <button type="button" data-emoji="🐕" onclick="selectEmoji('🐕')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🐕</button>
+                    <button type="button" data-emoji="🏠" onclick="selectEmoji('🏠')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">🏠</button>
+                    <button type="button" data-emoji="💻" onclick="selectEmoji('💻')"
+                        class="emoji-btn text-2xl p-2 rounded-lg border-2 border-transparent hover:bg-gray-100 transition">💻</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-[#d8dee9] mb-1">Startdato</label>
+                    <input type="date" id="input-start" required
+                        class="w-full p-3 bg-[#2e3440] border border-[#4c566a] rounded-lg text-[#eceff4] focus:ring-2 focus:ring-[#88c0d0] outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-[#d8dee9] mb-1">Sluttdato</label>
+                    <input type="date" id="input-end" required
+                        class="w-full p-3 bg-[#2e3440] border border-[#4c566a] rounded-lg text-[#eceff4] focus:ring-2 focus:ring-[#88c0d0] outline-none">
+                </div>
+            </div>
+
+            <button type="submit" id="submit-btn"
+                class="w-full bg-[#8fbcbb] hover:bg-[#88c0d0] text-[#2e3440] font-bold py-3 rounded-lg mt-4 shadow transition">
+                Lagre Ferie
+            </button>
+        </form>
+    </div>
+
+    <div id="success-message" class="hidden text-center">
+        <div class="bg-[#3b4252] rounded-2xl p-8 border-4 border-[#a3be8c] shadow-2xl max-w-sm mx-auto">
+            <div class="text-6xl mb-4">✅</div>
+            <h2 class="text-2xl font-bold text-[#eceff4] mb-2">Registrert!</h2>
+            <p class="text-[#d8dee9] mb-6">Din ferie er lagret. God ferie!</p>
+            <button onclick="resetForm()"
+                class="bg-[#81a1c1] hover:bg-[#88c0d0] text-[#2e3440] font-bold py-2 px-6 rounded-full transition">Registrer
+                en til</button>
+        </div>
+    </div>
+
+</body>
+
+</html>

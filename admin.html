@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Holiday Tracker Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // ... (Config remains same, imports updated above)
+
+        window.uploadAndSend = async function () {
+            if (!currentTargetSession) return;
+
+            const fileInput = document.getElementById('overlay-file');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Velg et bilde først!");
+                return;
+            }
+
+            const durationSelect = document.getElementById('overlay-duration');
+            const duration = parseInt(durationSelect.value);
+
+            // Upload
+            const storagePath = `overlays/${Date.now()}_${file.name}`;
+            const storageRef = ref(storage, storagePath);
+
+            const btn = document.getElementById('btn-send-image');
+            const originalText = "Send til Skjerm"; // Hardcoded to reset properly
+            btn.disabled = true;
+
+            const uploadTask = uploadBytesResumable(storageRef, file);
+
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    btn.innerText = `Laster opp... ${Math.round(progress)}%`;
+                },
+                (error) => {
+                    console.error("Upload failed", error);
+                    alert("Oisann! Opplasting feilet: " + error.message);
+                    btn.innerText = "Prøv igjen";
+                    btn.disabled = false;
+                },
+                async () => {
+                    // Upload completed successfully
+                    btn.innerText = "Sender til skjerm...";
+                    try {
+                        const url = await getDownloadURL(uploadTask.snapshot.ref);
+
+                        // Update Firestore
+                        const sessionRef = doc(db, 'artifacts', appId, 'sessions', currentTargetSession);
+                        await updateDoc(sessionRef, {
+                            imageOverlay: {
+                                url: url,
+                                duration: duration,
+                                startedAt: serverTimestamp()
+                            }
+                        });
+
+                        closeImageModal();
+                        console.log("Image sent to", currentTargetSession);
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    } catch (e) {
+                        console.error("Firestore Update Failed", e);
+                        alert("Bildet ble lastet opp, men klarte ikke oppdatere skjermen: " + e.message);
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    }
+                }
+            );
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOcFfiRIw3sgU9eqEbwc1uc_Ur1aTOJXk",
+            authDomain: "ferie-805e0.firebaseapp.com",
+            projectId: "ferie-805e0",
+            storageBucket: "ferie-805e0.firebasestorage.app",
+            messagingSenderId: "621338557882",
+            appId: "1:621338557882:web:9eae6887a484db316d7183",
+            measurementId: "G-C8PT9DKJ3Q"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        // const storage = getStorage(app); // Storage Disabled
+        const appId = 'holiday-tracker-main';
+
+        async function init() {
+            try {
+                await signInAnonymously(auth);
+                document.getElementById('auth-status').innerHTML = '<span class="text-green-400">Auth OK</span>';
+                startListening();
+            } catch (error) {
+                console.error("Auth", error);
+                document.getElementById('auth-status').innerHTML = '<span class="text-red-400">Auth Failed: ' + error.message + '</span>';
+            }
+        }
+
+        function startListening() {
+            document.getElementById('db-status').innerText = "Connecting to DB...";
+            // Path: artifacts/{appId}/sessions
+            const col = collection(db, 'artifacts', appId, 'sessions');
+
+            onSnapshot(col, (snapshot) => {
+                document.getElementById('db-status').innerHTML = `<span class="text-green-400">Connected (${snapshot.size} sessions)</span>`;
+                const list = document.getElementById('session-list');
+                list.innerHTML = '';
+
+                const now = new Date();
+
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const id = docSnap.id;
+                    const lastSeen = new Date(data.lastSeen);
+                    const diffSeconds = (now - lastSeen) / 1000;
+
+                    // Filter out very old sessions (> 1 hour?) or keep them to clean up?
+                    // Let's mark them as offline if > 2 mins
+                    const isOnline = diffSeconds < 120;
+
+                    if (diffSeconds > 3600 * 24) {
+                        // Optional: clean up dead sessions automatically?
+                        // deleteDoc(docSnap.ref);
+                        // return;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `p-4 rounded-xl border-2 flex flex-col gap-3 ${isOnline ? 'bg-slate-800 border-green-500/50' : 'bg-slate-900 border-gray-700 opacity-70'}`;
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-white font-bold text-lg">Display: ${id}</h3>
+                                <p class="text-xs text-gray-400 font-mono">${data.resolution} - ${data.userAgent.replace(/Mozilla.*?\)/, '')}</p>
+                            </div>
+                            <span class="px-2 py-1 rounded text-xs font-bold ${isOnline ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}">
+                                ${isOnline ? 'ONLINE' : 'OFFLINE'}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                            <div class="bg-black/30 p-2 rounded">
+                                <span class="text-gray-500 text-xs uppercase">View</span><br>
+                                ${data.currentView}
+                            </div>
+                            <div class="bg-black/30 p-2 rounded">
+                                <span class="text-gray-500 text-xs uppercase">Screensaver</span><br>
+                                ${data.screensaver}
+                            </div>
+                        </div>
+
+                        ${isOnline ? `
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <button onclick="sendCommand('${id}', 'set_view:dashboard')" class="bg-blue-600 hover:bg-blue-500 text-white py-2 rounded text-sm font-bold">
+                                Show Dashboard
+                            </button>
+                            <button onclick="sendCommand('${id}', 'set_view:tracker')" class="bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded text-sm font-bold">
+                                Show Tracker
+                            </button>
+                            <button onclick="sendCommand('${id}', 'trigger_screensaver:cleaning')" class="col-span-2 bg-yellow-600 hover:bg-yellow-500 text-white py-2 rounded text-sm font-bold flex items-center justify-center gap-2">
+                                <span>🧹</span> Start Cleaning Mode (10m)
+                            </button>
+                            <button onclick="sendCommand('${id}', 'trigger_screensaver:night')" class="bg-purple-600 hover:bg-purple-500 text-white py-2 rounded text-sm font-bold">
+                                Force Night Mode
+                            </button>
+                            <button onclick="sendCommand('${id}', 'trigger_screensaver:off')" class="bg-gray-600 hover:bg-gray-500 text-white py-2 rounded text-sm font-bold">
+                                Wake Up
+                            </button>
+                            
+                            <!-- Image Overlay Controls -->
+                            <div class="col-span-2 border-t border-gray-700 pt-2 mt-1">
+                                <p class="text-xs text-center text-gray-500 mb-1">IMAGE OVERLAY</p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button onclick="openImageModal('${id}')" class="bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 text-white py-2 rounded text-sm font-bold flex items-center justify-center gap-1">
+                                        <span>🖼️</span> Vis Bilde
+                                    </button>
+                                     <button onclick="removeImage('${id}')" class="bg-red-900/50 hover:bg-red-900 text-red-200 py-2 rounded text-sm font-bold border border-red-900">
+                                        Fjern Bilde
+                                    </button>
+                                </div>
+                                ${data.imageOverlay ? `<div class="text-[10px] text-green-400 text-center mt-1">Active: ${data.imageOverlay.duration === -1 ? 'Forever' : data.imageOverlay.duration + 's'}</div>` : ''}
+                            </div>
+
+                        </div>
+                        ` : `
+                        <button onclick="deleteSession('${id}')" class="w-full bg-red-900/50 hover:bg-red-900 text-red-200 py-2 rounded text-sm">
+                            Remove Dead Session
+                        </button>
+                        `}
+                    `;
+                    list.appendChild(card);
+                });
+
+                if (list.innerHTML === '') {
+                    list.innerHTML = '<p class="text-gray-500 text-center py-10">No active sessions found.</p>';
+                }
+            });
+        }
+
+        window.sendCommand = async function (sessionId, cmd) {
+            const ref = doc(db, 'artifacts', appId, 'sessions', sessionId);
+            try {
+                await updateDoc(ref, { command: cmd });
+                console.log("Sent", cmd, "to", sessionId);
+            } catch (e) {
+                console.error("Send failed", e);
+                alert("Failed to send command");
+            }
+        }
+
+        window.deleteSession = async function (sessionId) {
+            if (!confirm("Remove this session?")) return;
+            const ref = doc(db, 'artifacts', appId, 'sessions', sessionId);
+            await deleteDoc(ref);
+        }
+
+        // --- Image Overlay Logic ---
+        let currentTargetSession = null;
+
+        window.openImageModal = function (sessionId) {
+            currentTargetSession = sessionId;
+            document.getElementById('image-modal').classList.remove('hidden');
+            document.getElementById('image-modal').classList.add('flex');
+        }
+
+        window.closeImageModal = function () {
+            document.getElementById('image-modal').classList.add('hidden');
+            document.getElementById('image-modal').classList.remove('flex');
+            currentTargetSession = null;
+            document.getElementById('overlay-file').value = '';
+        }
+
+        window.uploadAndSend = function () {
+            if (!currentTargetSession) return;
+
+            const fileInput = document.getElementById('overlay-file');
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Velg et bilde først!");
+                return;
+            }
+
+            const btn = document.getElementById('btn-send-image');
+            const originalText = "Send til Skjerm";
+            btn.innerText = "Behandler bilde...";
+            btn.disabled = true;
+
+            // 1. Read and Compress Image (Client-side)
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    // Canvas resize to safe limit (e.g., max 800px) to stay under Firestore 1MB limit
+                    const MAX_SIZE = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        }
+                    } else {
+                        if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                    }
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Compress to JPEG quality 0.6
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+
+                    // Safety check for Firestore limit (approx 900KB to be safe)
+                    if (dataUrl.length > 900000) {
+                        alert("Bildet er for stort for 'direkte sending' (Database-grense). Prøv et enklere bilde.");
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    sendToFirestore(dataUrl);
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            async function sendToFirestore(base64Url) {
+                btn.innerText = "Sender...";
+                const duration = parseInt(document.getElementById('overlay-duration').value);
+                const fitMode = document.querySelector('input[name="fit"]:checked').value;
+
+                try {
+                    const sessionRef = doc(db, 'artifacts', appId, 'sessions', currentTargetSession);
+                    await updateDoc(sessionRef, {
+                        imageOverlay: {
+                            url: base64Url,
+                            duration: duration,
+                            fit: fitMode,
+                            startedAt: serverTimestamp()
+                        }
+                    });
+
+                    closeImageModal();
+                    console.log("Image sent (Base64)");
+                } catch (e) {
+                    console.error("Firestore Error", e);
+                    alert("Kunne ikke sende bildet: " + e.message);
+                } finally {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        window.removeImage = async function (sessionId) {
+            const sessionRef = doc(db, 'artifacts', appId, 'sessions', sessionId);
+            try {
+                await updateDoc(sessionRef, {
+                    imageOverlay: null
+                });
+            } catch (e) {
+                console.error("Remove failed", e);
+            }
+        }
+
+        init();
+    </script>
+</head>
+
+<body class="bg-slate-950 text-slate-200 min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+        <header class="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                Control Center
+            </h1>
+            <div class="text-xs text-gray-500">Holiday Tracker Admin</div>
+            <div class="text-xs text-gray-400 text-right">
+                <div id="auth-status">Authenticating...</div>
+                <div id="db-status">Waiting...</div>
+            </div>
+        </header>
+
+        <div id="session-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Sessions go here -->
+            <div class="col-span-full text-center text-gray-500 animate-pulse">Loading sessions...</div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="image-modal"
+        class="hidden fixed inset-0 bg-black/80 z-50 items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl max-w-md w-full shadow-2xl">
+            <h3 class="text-xl font-bold text-white mb-4">Last opp bilde til skjerm</h3>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Velg bilde</label>
+                    <input type="file" id="overlay-file" accept="image/*"
+                        class="w-full bg-slate-800 border border-slate-700 rounded p-2 text-sm text-white focus:border-blue-500 outline-none">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Varighet</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="duration" value="10" checked
+                                onchange="document.getElementById('overlay-duration').value=10" class="peer sr-only">
+                            <div
+                                class="bg-slate-800 peer-checked:bg-blue-600 peer-checked:text-white text-gray-400 py-2 rounded text-center text-sm font-bold border border-slate-700 peer-checked:border-blue-500 transition-all">
+                                10s
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="duration" value="30"
+                                onchange="document.getElementById('overlay-duration').value=30" class="peer sr-only">
+                            <div
+                                class="bg-slate-800 peer-checked:bg-blue-600 peer-checked:text-white text-gray-400 py-2 rounded text-center text-sm font-bold border border-slate-700 peer-checked:border-blue-500 transition-all">
+                                30s
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="duration" value="60"
+                                onchange="document.getElementById('overlay-duration').value=60" class="peer sr-only">
+                            <div
+                                class="bg-slate-800 peer-checked:bg-blue-600 peer-checked:text-white text-gray-400 py-2 rounded text-center text-sm font-bold border border-slate-700 peer-checked:border-blue-500 transition-all">
+                                1m
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="duration" value="-1"
+                                onchange="document.getElementById('overlay-duration').value=-1" class="peer sr-only">
+                            <div
+                                class="bg-slate-800 peer-checked:bg-purple-600 peer-checked:text-white text-gray-400 py-2 rounded text-center text-sm font-bold border border-slate-700 peer-checked:border-purple-500 transition-all">
+                                ∞
+                            </div>
+                        </label>
+                    </div>
+                    <input type="hidden" id="overlay-duration" value="10">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-400 mb-1">Tilpasning</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="fit" value="contain" class="peer sr-only">
+                            <div
+                                class="bg-slate-800 peer-checked:bg-indigo-600 peer-checked:text-white text-gray-400 py-2 rounded text-center text-sm font-bold border border-slate-700 peer-checked:border-indigo-500 transition-all">
+                                Vis Hele
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="fit" value="cover" checked class="peer sr-only">
+                            <div
+                                class="bg-slate-800 peer-checked:bg-indigo-600 peer-checked:text-white text-gray-400 py-2 rounded text-center text-sm font-bold border border-slate-700 peer-checked:border-indigo-500 transition-all">
+                                Fyll Skjerm
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button onclick="closeImageModal()"
+                        class="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-3 rounded-xl font-bold transition-colors">
+                        Avbryt
+                    </button>
+                    <button id="btn-send-image" onclick="uploadAndSend()"
+                        class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl font-bold transition-colors shadow-lg shadow-blue-900/20">
+                        Send til Skjerm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

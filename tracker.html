@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juleferie Oversikt - Live</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&family=Nunito:wght@400;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: radial-gradient(circle at center, #2e3440 0%, #242933 100%);
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .christmas-font {
+            font-family: 'Mountains of Christmas', cursive;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+
+<body class="flex flex-col h-full">
+
+    <canvas id="snow-canvas" class="fixed inset-0 pointer-events-none z-10 hidden"></canvas>
+
+    <!-- Main Content -->
+    <div
+        class="flex-grow flex flex-col items-center justify-center p-4 pb-32 relative z-10 w-full max-w-[95%] mx-auto overflow-y-auto h-full scrollbar-hide">
+        <header class="text-center mb-8 shrink-0">
+            <h1 class="text-5xl md:text-6xl text-yellow-300 christmas-font drop-shadow-lg font-bold">
+                🎄 Juleferie 2025 🎄
+            </h1>
+            <p class="text-blue-200 mt-2 text-lg">God jul til hele gjengen!</p>
+        </header>
+
+        <div id="employee-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 w-full fade-in shrink-0">
+            <div class="col-span-full text-center text-white/50 animate-pulse">Laster ferieoversikt...</div>
+        </div>
+
+        <div id="pagination-dots" class="flex justify-center mt-6 h-4 shrink-0"></div>
+    </div>
+
+    <!-- QR Code -->
+    <div
+        class="fixed bottom-6 left-6 z-50 bg-[#2e3440]/80 backdrop-blur-md p-3 rounded-2xl shadow-2xl border border-[#4c566a]/50 hover:bg-[#2e3440] transition-colors group">
+        <div class="flex flex-col items-center gap-2">
+            <div id="qrcode" class="bg-white p-2 rounded-xl"></div>
+            <span
+                class="text-[#d8dee9] text-xs font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-[#3b4252] px-2 py-1 rounded shadow-lg border border-[#4c566a]">
+                Scan meg
+            </span>
+        </div>
+    </div>
+
+    <!-- Image Overlay -->
+    <div id="overlay-container" class="hidden fixed inset-0 z-[10000] bg-black flex items-center justify-center">
+        <img id="overlay-image" src="" class="w-full h-full object-cover">
+    </div>
+
+    <!-- Dashboard View -->
+    <div id="dashboard-view" class="hidden fixed inset-0 bg-[#2e3440] z-50 flex flex-col font-sans text-[#eceff4]">
+        <div id="comic-grid"
+            class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2 p-2 overflow-y-auto w-full max-w-[1800px] mx-auto scroll-smooth no-scrollbar">
+            <div class="col-span-full flex flex-col items-center justify-center h-full text-[#4c566a] animate-pulse">
+                <span class="text-lg font-medium">Laster inn striper...</span>
+            </div>
+        </div>
+        <div
+            class="min-h-[100px] bg-[#3b4252] border-t border-[#4c566a] flex items-center justify-between px-8 py-4 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.3)] z-20 relative">
+            <div class="flex-grow flex justify-start w-3/5 pr-4">
+                <p id="dash-quote"
+                    class="text-lg md:text-xl text-[#d8dee9] italic text-left leading-normal whitespace-nowrap truncate border-l-4 border-[#5e81ac] pl-6 py-2">
+                    "Loading wisdom..."</p>
+            </div>
+            <div class="flex items-center justify-end gap-4 w-1/5 min-w-[150px]">
+                <div id="dash-clock" class="text-4xl font-mono font-bold text-[#eceff4] tracking-wider">00:00</div>
+                <div id="connection-status"
+                    class="w-3 h-3 rounded-full bg-[#bf616a] shadow-[0_0_10px_rgba(191,97,106,0.7)] transition-colors duration-500">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screensaver Bouncer -->
+    <div id="screensaver" class="hidden fixed inset-0 z-[5000] bg-black cursor-none">
+        <div id="screensaver-bouncer" class="absolute text-6xl select-none" style="top:50%;left:50%">🎄</div>
+    </div>
+
+    <!-- Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, query, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOcFfiRIw3sgU9eqEbwc1uc_Ur1aTOJXk",
+            authDomain: "ferie-805e0.firebaseapp.com",
+            projectId: "ferie-805e0",
+            storageBucket: "ferie-805e0.firebasestorage.app",
+            messagingSenderId: "621338557882",
+            appId: "1:621338557882:web:9eae6887a484db316d7183",
+            measurementId: "G-C8PT9DKJ3Q"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'holiday-tracker-main';
+
+        const sessionId = localStorage.getItem('holiday_session_id') || 'sess_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('holiday_session_id', sessionId);
+
+        function updateStatus(msg, color) {
+            const el = document.getElementById('fb-status');
+            if (el) {
+                const time = new Date().toLocaleTimeString('nb-NO').split(' ')[0];
+                el.innerHTML = `<span style="opacity:0.6">${time}</span> ${msg}`;
+                el.style.color = color || 'white';
+            }
+        }
+
+        // Init
+        window.addEventListener('load', async () => {
+            // UI Debug
+            const disp = document.createElement('div');
+            disp.className = "fixed bottom-1 right-1 text-[10px] text-white/80 font-mono pointer-events-none z-[200] mix-blend-difference flex flex-col items-end bg-black/50 p-1 rounded";
+            disp.innerHTML = `<div id="fb-status" class="font-bold">Init...</div><div class="text-white/50">${sessionId}</div>`;
+            document.body.appendChild(disp);
+
+            // Helpers
+            window.Screensaver.init();
+            Dashboard.init();
+
+            // Generate QR
+            const baseUrl = window.location.href.endsWith('/') ? window.location.href : window.location.href.substring(0, window.location.href.lastIndexOf('/') + 1);
+            new QRCode(document.getElementById("qrcode"), { text: baseUrl + 'register.html', width: 64, height: 64 });
+
+            // Auth
+            try {
+                updateStatus("Auth...", "yellow");
+                await signInAnonymously(auth);
+            } catch (e) {
+                console.error("Auth Fail", e);
+                updateStatus("Auth Err: " + e.code, "red");
+            }
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                updateStatus("Connected", "#4ade80");
+                startHeartbeat();
+                // Only load holiday data if there is an active season
+                if (getSeason()) {
+                    startDataListener();
+                } else {
+                    console.log("No Holiday Season - Data Load Skipped");
+                }
+            } else {
+                updateStatus("No Auth", "orange");
+            }
+        });
+
+        // Heartbeat (Writes to Firebase)
+        function startHeartbeat() {
+            const sessionRef = doc(db, 'artifacts', appId, 'sessions', sessionId);
+
+            // Listen for Commands
+            onSnapshot(sessionRef, (snap) => {
+                if (!snap.exists()) return;
+                const data = snap.data();
+                if (data.command) {
+                    handleCommand(data.command);
+                    updateDoc(sessionRef, { command: null });
+                }
+                if (data.imageOverlay) handleImageOverlay(data.imageOverlay, sessionRef);
+                else hideImageOverlay();
+            });
+
+            // Write Heartbeat
+            const beat = async () => {
+                try {
+                    await setDoc(sessionRef, {
+                        lastSeen: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        resolution: `${window.innerWidth}x${window.innerHeight}`,
+                        currentView: document.getElementById('dashboard-view').classList.contains('hidden') ? 'tracker' : 'dashboard',
+                        screensaver: window.Screensaver.active ? window.Screensaver.mode : 'off'
+                    }, { merge: true });
+                    // updateStatus("Heartbeat", "#4ade80"); // Too noisy
+                } catch (e) {
+                    updateStatus("HB Fail", "red");
+                }
+            };
+            beat();
+            setInterval(beat, 30000);
+        }
+
+        // Data Listener
+        function startDataListener() {
+            const currentSeason = getSeason() || 'winter';
+            applySeasonTheme(currentSeason);
+
+            // Determine View
+            if (!getSeason()) {
+                document.getElementById('dashboard-view').classList.remove('hidden');
+                document.getElementById('dashboard-view').classList.add('flex');
+            }
+
+            const q = query(collection(db, 'artifacts', appId, 'public', 'data', currentSeason));
+            onSnapshot(q, (snap) => {
+                const items = [];
+                snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+
+                // Auto-cleanup Expired
+                const now = new Date();
+                const todayStr = now.toISOString().split('T')[0];
+
+                items.forEach(async (item) => {
+                    if (item.endDate && item.endDate < todayStr) {
+                        console.log("Deleting expired:", item.name, item.endDate);
+                        try {
+                            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', currentSeason, item.id));
+                        } catch (e) { console.error("Cleanup fail", e); }
+                    }
+                });
+
+                // Simple sort logic
+                items.sort((a, b) => (a.startDate || '').localeCompare(b.startDate || ''));
+                renderGrid(items);
+            });
+        }
+
+        // --- Helpers ---
+        function getSeason() {
+            const d = new Date();
+            const m = d.getMonth(), day = d.getDate();
+            if (m === 11 || (m === 0 && day <= 5)) return 'christmas';
+            if (m === 1 && day >= 15 && day <= 28) return 'winter';
+            if (m === 3 && day <= 22) return 'spring';
+            if ((m === 5 && day >= 20) || m === 6 || (m === 7 && day <= 18)) return 'summer';
+            if ((m === 8 && day >= 28) || (m === 9 && day <= 10)) return 'autumn';
+            return null;
+        }
+
+        function createCard(emp) {
+            // Simplified Card Logic for robustness
+            const div = document.createElement('div');
+            div.className = "bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20 shadow-xl text-white flex flex-col justify-between min-h-[200px]";
+            // ... (Insert rich card logic if needed, keeping simple for fix)
+            div.innerHTML = `
+                <div class="absolute -top-3 -right-3 bg-red-500 rounded-full w-10 h-10 flex items-center justify-center text-xl shadow-lg border-2 border-white">🎄</div>
+                <div>
+                   <h2 class="text-2xl font-bold mb-1">${emp.name}</h2>
+                   <p class="text-white/70 text-sm font-semibold uppercase">Ferie</p>
+                   <div class="mt-4 space-y-2">
+                       <div class="bg-black/20 p-2 rounded">
+                           <p class="text-xs text-white/50 uppercase">Start</p>
+                           <p class="font-bold">${emp.startDate}</p>
+                       </div>
+                       <div class="bg-black/20 p-2 rounded">
+                           <p class="text-xs text-white/50 uppercase">Slutt</p>
+                           <p class="font-bold">${emp.endDate}</p>
+                       </div>
+                   </div>
+                </div>
+                <button onclick="window.deleteItem('${emp.id}')" class="mt-2 text-xs text-red-300 hover:text-red-100 text-right w-full">Slett</button>
+            `;
+            return div;
+        }
+
+        function renderGrid(employees) {
+            const grid = document.getElementById('employee-grid');
+            grid.innerHTML = '';
+            if (employees.length === 0) grid.innerHTML = '<div class="col-span-full text-center text-white/50">Ingen data</div>';
+            employees.forEach(e => grid.appendChild(createCard(e)));
+        }
+
+        function applySeasonTheme(season) {
+            // Minimal theme logic
+            const themes = {
+                christmas: { title: "Juleferie", bg: "radial-gradient(circle at center, #2d3748 0%, #1a202c 100%)" },
+                winter: { title: "Vinterferie", bg: "radial-gradient(circle at center, #e0f2fe 0%, #0284c7 100%)" },
+            };
+            const theme = themes[season] || themes.christmas;
+            document.body.style.background = theme.bg;
+            document.querySelector('header h1').innerText = "🎄 " + theme.title + " 🎄";
+        }
+
+        function handleCommand(cmd) {
+            if (cmd === 'reload') window.location.reload();
+            if (cmd.startsWith('trigger_screensaver')) {
+                const mode = cmd.split(':')[1];
+                mode === 'off' ? window.stopScreensaver() : window.startScreensaver(mode);
+            }
+        }
+
+        // Image Overlay
+        let overlayTimeout;
+        function handleImageOverlay(data, ref) {
+            document.getElementById('overlay-container').classList.remove('hidden');
+            const img = document.getElementById('overlay-image');
+            if (img.src !== data.url) img.src = data.url;
+
+            // Apply Fit Mode
+            img.className = "w-full h-full " + (data.fit === 'contain' ? 'object-contain' : 'object-cover');
+
+            if (data.duration !== -1) {
+                clearTimeout(overlayTimeout);
+                let remaining = data.duration; // Simple duration or calc elapsed
+                // Just reset timer on every update for simplicity or calc
+                overlayTimeout = setTimeout(() => {
+                    hideImageOverlay();
+                    updateDoc(ref, { imageOverlay: null });
+                }, remaining * 1000);
+            }
+        }
+        function hideImageOverlay() {
+            document.getElementById('overlay-container').classList.add('hidden');
+        }
+
+        // Globals for existing onclicks
+        window.deleteItem = async (id) => {
+            if (confirm('Slett?')) await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', getSeason() || 'winter', id));
+        };
+        window.startScreensaver = (mode) => window.Screensaver.start(mode);
+        window.stopScreensaver = () => window.Screensaver.stop();
+
+        // Sub-modules
+        window.Screensaver = {
+            active: false, mode: 'night',
+            init: function () { this.el = document.getElementById('screensaver'); },
+            start: function (m) { this.active = true; this.mode = m; this.el.classList.remove('hidden'); },
+            stop: function () { this.active = false; this.el.classList.add('hidden'); }
+        };
+
+        const Dashboard = {
+            ws: null,
+            reconnectDelay: 5000,
+            clientId: 'hol-tracker-' + Date.now(),
+
+            init: function () {
+                this.startClock();
+                this.connectWS();
+            },
+
+            startClock: function () {
+                setInterval(() => {
+                    document.getElementById('dash-clock').innerText = new Date().toLocaleTimeString('nb-NO').slice(0, 5);
+                }, 1000);
+            },
+
+            connectWS: function () {
+                const url = `wss://ncd.idmedia.no/ws/${this.clientId}`;
+                console.log('Connecting WS:', url);
+                this.ws = new WebSocket(url);
+
+                this.ws.onopen = () => {
+                    console.log('WS Open');
+                    this.updateStatus(true);
+                    this.reconnectDelay = 5000;
+                };
+
+                this.ws.onmessage = (e) => {
+                    try {
+                        const data = JSON.parse(e.data);
+                        if (data.event === 'update') this.updateContent(data.data);
+                    } catch (err) { console.error('WS Data Err', err); }
+                };
+
+                this.ws.onclose = () => {
+                    console.log('WS Closed');
+                    this.updateStatus(false);
+                    setTimeout(() => this.connectWS(), this.reconnectDelay);
+                    this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000);
+                };
+            },
+
+            updateStatus: function (ok) {
+                const el = document.getElementById('connection-status');
+                if (el) {
+                    el.className = `w-3 h-3 rounded-full transition-colors duration-500 shadow-[0_0_10px_rgba(0,0,0,0.5)] ${ok ? 'bg-green-500 shadow-green-500/50' : 'bg-red-500 shadow-red-500/50'}`;
+                }
+            },
+
+            updateContent: function (data) {
+                // Quotes
+                if (data.quotes && data.quotes.sadserver) {
+                    const raw = data.quotes.sadserver;
+                    // Flatten text (remove newlines), clean spaces
+                    let clean = raw.replace(/\n/g, " ").replace(/\s+/g, " ").trim();
+
+                    // Extract attribution if present (assuming - @sadserver format)
+                    let text = clean;
+                    let author = "- @sadserver";
+
+                    // Simple split if it exists in the text
+                    const splitIdx = clean.toLowerCase().lastIndexOf("- @sadserver");
+                    if (splitIdx > -1) {
+                        text = clean.substring(0, splitIdx).trim();
+                        author = clean.substring(splitIdx).trim();
+                    }
+
+                    // HTML structuring: Text on one line (truncated), Author on next
+                    const el = document.getElementById('dash-quote');
+                    // Reset classes for this layout
+                    el.className = "text-[#d8dee9] border-l-4 border-[#5e81ac] pl-6 py-1";
+                    el.innerHTML = `
+                        <div class="text-lg md:text-xl italic whitespace-nowrap overflow-hidden text-ellipsis leading-tight">"${text}"</div>
+                        <div class="text-sm font-bold text-white/80 mt-1">${author}</div>
+                    `;
+                }
+
+                // Comics
+                if (data.comics) {
+                    const grid = document.getElementById('comic-grid');
+                    grid.innerHTML = '';
+                    const sources = [
+                        { domain: "vg.no", type: "Lunch" },
+                        { domain: "vg.no", type: "Pappa" },
+                        { domain: "tu.no", type: "Lunch" }
+                    ];
+
+                    sources.forEach(src => {
+                        const group = data.comics[src.domain];
+                        const list = (group && group[src.type]) ? group[src.type].slice(0, 2) : [];
+
+                        list.forEach(imgData => {
+                            let url = imgData.url.startsWith('/') ? 'https://ncd.idmedia.no' + imgData.url : imgData.url;
+                            const div = document.createElement('div');
+                            div.className = "w-full h-full bg-[#3b4252]/50 rounded-lg shadow-sm border border-[#4c566a] p-2 flex items-center justify-center";
+                            div.innerHTML = `<img src="${url}" class="w-full h-full object-contain max-h-full">`;
+                            grid.appendChild(div);
+                        });
+                    });
+                }
+            }
+        };
+
+        // --- Init Overrides ---
+        // Ensure Dashboard is Default
+        window.addEventListener('load', () => {
+            // Force Dashboard Visible Immediately
+            document.getElementById('dashboard-view').classList.remove('hidden');
+            document.getElementById('dashboard-view').classList.add('flex');
+        });
+
+    </script>
+</body>
+
+</html>
