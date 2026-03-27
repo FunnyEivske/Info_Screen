@@ -1,124 +1,135 @@
 <!DOCTYPE html>
 <html lang="no">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Buss & Vær Dashboard</title>
-
-    <!-- 1. Import Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
-    <!-- 2. Import Inter font from Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>Info Dashboard Hub</title>
+    <!-- Using Tailwind CSS for premium rapid styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            margin: 0;
+            min-height: 100vh;
+            color: #f8fafc;
+        }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+        }
 
-    <!-- 3. Link to our external stylesheet (No Tailwind) -->
-    <link rel="stylesheet" href="style.css">
+        /* Subtle floating animations for the background blobs */
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
 
+        .blob-1 {
+            animation: float 10s infinite ease-in-out;
+        }
+        
+        .blob-2 {
+            animation: float 12s infinite ease-in-out reverse;
+        }
+    </style>
 </head>
+<body class="flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden">
+    
+    <!-- Animated background elements -->
+    <div class="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/20 rounded-full mix-blend-screen filter blur-[100px] blob-1 z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-purple-600/20 rounded-full mix-blend-screen filter blur-[120px] blob-2 z-0"></div>
 
-<body>
-
-    <!-- Weather Overlay -->
-    <!-- <div id="weather-overlay"></div> -->
-
-    <!-- Main Content Grid -->
-    <div class="main-grid-container">
-
-        <!-- Column 1: Mot Kristiansand (Vest) -->
-        <div class="card bus-column">
-            <!-- Header -->
-            <div class="card-header">
-                <h2 class="card-title">Mot Kristiansand</h2>
-            </div>
-            <!-- Schedule List -->
-            <div id="bus-departures-1" class="bus-list">
-                <p>Laster sanntid...</p>
-            </div>
+    <header class="text-center mb-16 z-10 w-full mt-4">
+        <div class="inline-block mb-4 p-3 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 shadow-xl">
+            <i class="fa-solid fa-shapes text-2xl text-cyan-400"></i>
         </div>
+        <h1 class="text-5xl md:text-6xl font-black mb-4 tracking-tight glow-text bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">Info Screen Hub</h1>
+        <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto font-light">Vennligst velg hvilken skjerm du ønsker å vise fra menyen under.</p>
+    </header>
 
-        <!-- Column 2: Weather & Logs -->
-        <div class="weather-column">
-            <!-- Main Clock -->
-            <div id="clock-main">--:--</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-full max-w-6xl z-10">
+        <!-- Card 1 -->
+        <a href="bus_weather.html" class="glass-card rounded-2xl p-8 group flex flex-col items-center text-center cursor-pointer decoration-transparent">
+            <div class="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mb-6 group-hover:bg-blue-500/40 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all duration-300">
+                <i class="fa-solid fa-bus text-3xl text-blue-400 group-hover:scale-110 transition-transform"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Buss & Vær</h2>
+            <p class="text-slate-400 text-sm leading-relaxed">Hovedskjerm for bussavganger, lokalt vær og sanntidsnyheter.</p>
+        </a>
 
-            <div class="weather-row">
-                <div class="weather-city">Grimstad</div>
-                <div class="weather-temp-wrapper">
-                    <img id="icon-grimstad" class="weather-bg-icon" src="" alt="">
-                    <div id="temp-grimstad" class="weather-temp">…</div>
-                </div>
+        <!-- Card 2 -->
+        <a href="news_weather.html" class="glass-card rounded-2xl p-8 group flex flex-col items-center text-center cursor-pointer decoration-transparent">
+            <div class="w-16 h-16 rounded-full bg-cyan-500/20 flex items-center justify-center mb-6 group-hover:bg-cyan-500/40 group-hover:shadow-[0_0_20px_rgba(6,182,212,0.4)] transition-all duration-300">
+                <i class="fa-solid fa-cloud-sun text-3xl text-cyan-400 group-hover:scale-110 transition-transform"></i>
             </div>
-            <div class="weather-row">
-                <div class="weather-city">Kristiansand</div>
-                <div class="weather-temp-wrapper">
-                    <img id="icon-kristiansand" class="weather-bg-icon" src="" alt="">
-                    <div id="temp-kristiansand" class="weather-temp">…</div>
-                </div>
-            </div>
-            <div class="weather-row">
-                <div class="weather-city">Arendal</div>
-                <div class="weather-temp-wrapper">
-                    <img id="icon-arendal" class="weather-bg-icon" src="" alt="">
-                    <div id="temp-arendal" class="weather-temp">…</div>
-                </div>
-            </div>
-            <div class="weather-row">
-                <div class="weather-city">Høvåg</div>
-                <div class="weather-temp-wrapper">
-                    <img id="icon-hovag" class="weather-bg-icon" src="" alt="">
-                    <div id="temp-hovag" class="weather-temp">…</div>
-                </div>
-            </div>
-        </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Vær & Nyheter</h2>
+            <p class="text-slate-400 text-sm leading-relaxed">Detaljert værmelding for Grimstad og utvidede nyhetsoppdateringer.</p>
+        </a>
 
-        <!-- Column 3: Mot Arendal (Øst) -->
-        <div class="card bus-column">
-            <!-- Header -->
-            <div class="card-header">
-                <h2 class="card-title">Mot Arendal</h2>
+        <!-- Card 3 -->
+        <a href="Lunsj.html" class="glass-card rounded-2xl p-8 group flex flex-col items-center text-center cursor-pointer decoration-transparent">
+            <div class="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center mb-6 group-hover:bg-emerald-500/40 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] transition-all duration-300">
+                <i class="fa-solid fa-fish-fins text-3xl text-emerald-400 group-hover:scale-110 transition-transform"></i>
             </div>
-            <!-- Schedule List -->
-            <div id="bus-departures-2" class="bus-list">
-                <p>Laster sanntid...</p>
+            <h2 class="text-2xl font-bold mb-2 text-white">Lunsj Akvarium</h2>
+            <p class="text-slate-400 text-sm leading-relaxed">Avslappende interaktivt akvarium med vaktplan og lunsjtider.</p>
+        </a>
+
+        <!-- Card 4 -->
+        <a href="tracker.html" class="glass-card rounded-2xl p-8 group flex flex-col items-center text-center cursor-pointer decoration-transparent">
+            <div class="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mb-6 group-hover:bg-purple-500/40 group-hover:shadow-[0_0_20px_rgba(168,85,247,0.4)] transition-all duration-300">
+                <i class="fa-solid fa-calendar-days text-3xl text-purple-400 group-hover:scale-110 transition-transform"></i>
             </div>
-        </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Ferie Tracker</h2>
+            <p class="text-slate-400 text-sm leading-relaxed">Live-oversikt og skjermsparer som viser hvem som er på ferie til enhver tid.</p>
+        </a>
+
+        <!-- Card 5 -->
+        <a href="register.html" class="glass-card rounded-2xl p-8 group flex flex-col items-center text-center cursor-pointer decoration-transparent">
+            <div class="w-16 h-16 rounded-full bg-pink-500/20 flex items-center justify-center mb-6 group-hover:bg-pink-500/40 group-hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] transition-all duration-300">
+                <i class="fa-solid fa-plane-up text-3xl text-pink-400 group-hover:scale-110 transition-transform"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Registrer Ferie</h2>
+            <p class="text-slate-400 text-sm leading-relaxed">Personalets registreringsskjema for å melde inn kommende feriedager.</p>
+        </a>
+
+        <!-- Card 6 -->
+        <a href="admin.html" class="glass-card rounded-2xl p-8 group flex flex-col items-center text-center relative overflow-hidden cursor-pointer decoration-transparent">
+            <div class="absolute top-0 right-0 bg-red-500/20 backdrop-blur-md text-red-400 text-[10px] uppercase tracking-widest font-bold px-4 py-1.5 rounded-bl-xl border-b border-l border-red-500/30">Adgang</div>
+            <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-6 group-hover:bg-red-500/40 group-hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all duration-300 mt-2">
+                <i class="fa-solid fa-lock text-3xl text-red-400 group-hover:scale-110 transition-transform"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-2 text-white">Kontrollsenter</h2>
+            <p class="text-slate-400 text-sm leading-relaxed">Administrer displayer og send fjernstyrskommandoer og overlays.</p>
+        </a>
     </div>
 
-    <!-- Bottom Ticker Bar -->
-    <div class="ticker-wrapper">
-        <div class="ticker-grid">
-            <!-- NRK News -->
-            <div class="ticker-bar">
-                <div class="tag nrk-tag">NRK</div>
-                <p id="nrk-headline">Laster NRK...</p>
-            </div>
-            <!-- VG News -->
-            <div class="ticker-bar">
-                <div class="tag vg-tag">VG</div>
-                <p id="vg-headline">Laster VG...</p>
-            </div>
+    <footer class="mt-20 z-10 w-full max-w-6xl text-center flex flex-col justify-center items-center">
+        <div class="flex items-center gap-2 px-6 py-3 rounded-full bg-slate-800/50 backdrop-blur-sm border border-slate-700/50">
+            <p class="text-slate-400 text-sm font-medium">Made by <span class="text-slate-200">Anaru</span></p>
+            <i class="fa-solid fa-heart text-red-500 text-xs animate-pulse"></i>
+            <p class="text-slate-400 text-sm font-medium">System</p>
         </div>
-
-        <!-- YR Tag (moved out or kept? strict user req: "split news bar... add VG") -->
-        <!-- The previous layout had NRK ... YR. I'll remove YR tag from the bars to cleaner look or keep it? 
-             User didn't explicitly say remove YR, but "split news bar". 
-             I will remove the specific YR tag element if it doesn't fit, 
-             or maybe just leave it out as the weather column handles YR attribution effectively. 
-             The original code had <div class="tag yr-tag">YR</div> at the end.
-             I'll omit it for cleaner 50/50 split of news. -->
-
-        <div class="footer">
-            Made by Anaru with <span>♥</span>
-        </div>
-    </div>
-
-    <!-- Link to the external JavaScript file. 
-         'defer' ensures it runs after the HTML is parsed. -->
-    <script src="script.js" defer></script>
+    </footer>
 
 </body>
-
 </html>

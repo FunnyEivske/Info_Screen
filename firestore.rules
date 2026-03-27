@@ -1,0 +1,16 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 1. Only allow access to the specific data for this holiday tracker app
+    match /artifacts/holiday-tracker-main/{document=**} {
+      // Require the user to at least be anonymously authenticated
+      allow read, write: if request.auth != null;
+    }
+    
+    // 2. Deny access to everything else in the database
+    match /{document=**} {
+      allow read, write: if false; 
+    }
+  }
+}

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buss & Vær Dashboard</title>
+
+    <!-- 1. Import Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- 2. Import Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- 3. Link to our external stylesheet (No Tailwind) -->
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <!-- Weather Overlay -->
+    <!-- <div id="weather-overlay"></div> -->
+
+    <!-- Main Content Grid -->
+    <div class="main-grid-container">
+
+        <!-- Column 1: Mot Kristiansand (Vest) -->
+        <div class="card bus-column">
+            <!-- Header -->
+            <div class="card-header">
+                <h2 class="card-title">Mot Kristiansand</h2>
+            </div>
+            <!-- Schedule List -->
+            <div id="bus-departures-1" class="bus-list">
+                <p>Laster sanntid...</p>
+            </div>
+        </div>
+
+        <!-- Column 2: Weather & Logs -->
+        <div class="weather-column">
+            <!-- Main Clock -->
+            <div id="clock-main">--:--</div>
+
+            <div class="weather-row">
+                <div class="weather-city">Grimstad</div>
+                <div class="weather-temp-wrapper">
+                    <img id="icon-grimstad" class="weather-bg-icon" src="" alt="">
+                    <div id="temp-grimstad" class="weather-temp">…</div>
+                </div>
+            </div>
+            <div class="weather-row">
+                <div class="weather-city">Kristiansand</div>
+                <div class="weather-temp-wrapper">
+                    <img id="icon-kristiansand" class="weather-bg-icon" src="" alt="">
+                    <div id="temp-kristiansand" class="weather-temp">…</div>
+                </div>
+            </div>
+            <div class="weather-row">
+                <div class="weather-city">Arendal</div>
+                <div class="weather-temp-wrapper">
+                    <img id="icon-arendal" class="weather-bg-icon" src="" alt="">
+                    <div id="temp-arendal" class="weather-temp">…</div>
+                </div>
+            </div>
+            <div class="weather-row">
+                <div class="weather-city">Høvåg</div>
+                <div class="weather-temp-wrapper">
+                    <img id="icon-hovag" class="weather-bg-icon" src="" alt="">
+                    <div id="temp-hovag" class="weather-temp">…</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column 3: Mot Arendal (Øst) -->
+        <div class="card bus-column">
+            <!-- Header -->
+            <div class="card-header">
+                <h2 class="card-title">Mot Arendal</h2>
+            </div>
+            <!-- Schedule List -->
+            <div id="bus-departures-2" class="bus-list">
+                <p>Laster sanntid...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Ticker Bar -->
+    <div class="ticker-wrapper">
+        <div class="ticker-grid">
+            <!-- NRK News -->
+            <div class="ticker-bar">
+                <div class="tag nrk-tag">NRK</div>
+                <p id="nrk-headline">Laster NRK...</p>
+            </div>
+            <!-- VG News -->
+            <div class="ticker-bar">
+                <div class="tag vg-tag">VG</div>
+                <p id="vg-headline">Laster VG...</p>
+            </div>
+        </div>
+
+        <!-- YR Tag (moved out or kept? strict user req: "split news bar... add VG") -->
+        <!-- The previous layout had NRK ... YR. I'll remove YR tag from the bars to cleaner look or keep it? 
+             User didn't explicitly say remove YR, but "split news bar". 
+             I will remove the specific YR tag element if it doesn't fit, 
+             or maybe just leave it out as the weather column handles YR attribution effectively. 
+             The original code had <div class="tag yr-tag">YR</div> at the end.
+             I'll omit it for cleaner 50/50 split of news. -->
+
+        <div class="footer">
+            Made by Anaru with <span>♥</span>
+        </div>
+    </div>
+
+    <!-- Link to the external JavaScript file. 
+         'defer' ensures it runs after the HTML is parsed. -->
+    <script src="script.js" defer></script>
+
+</body>
+
+</html>
