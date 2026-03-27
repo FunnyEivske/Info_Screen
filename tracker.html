@@ -78,7 +78,7 @@
 
     <!-- Main Content: Tracker -->
     <div
-        class="flex-grow flex flex-col items-center justify-center p-6 pb-32 relative z-10 w-full max-w-[95%] mx-auto overflow-y-auto h-full scrollbar-hide">
+        class="flex-grow flex flex-col items-center justify-center p-6 pb-[180px] relative z-10 w-full max-w-[95%] mx-auto overflow-y-auto h-full scrollbar-hide">
         <header class="text-center mb-8 shrink-0">
             <h1 id="tracker-title" class="text-5xl md:text-6xl text-m3-primary font-bold tracking-tight drop-shadow">
                 Ferieoversikt
@@ -93,38 +93,40 @@
         <div id="pagination-dots" class="flex justify-center mt-6 h-4 shrink-0"></div>
     </div>
 
-    <!-- Small Floating QR Code -->
-    <div
-        class="fixed bottom-6 left-6 z-[100] bg-m3-surfaceHigh/80 backdrop-blur-md p-3 rounded-m3-md shadow-[0_8px_20px_rgba(0,0,0,0.5)] border border-m3-primaryContainer hover:bg-m3-surfaceHigh transition-colors group">
-        <div class="flex flex-col items-center gap-2">
-            <div id="qrcode" class="bg-white p-1 rounded-lg shadow-inner"></div>
-            <span
-                class="text-m3-secondary text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-m3-surface px-2 py-1 rounded shadow-lg border border-[#4A4458]">
-                Registrer deg
-            </span>
-        </div>
-    </div>
-
     <!-- Image Overlay -->
     <div id="overlay-container" class="hidden fixed inset-0 z-[10000] bg-m3-bg flex items-center justify-center">
         <img id="overlay-image" src="" class="w-full h-full object-cover">
     </div>
 
     <!-- Dashboard View -->
-    <div id="dashboard-view" class="hidden fixed inset-0 bg-m3-bg z-50 flex flex-col font-sans text-m3-secondary">
+    <div id="dashboard-view" class="hidden fixed inset-x-0 top-0 bottom-[160px] bg-m3-bg z-40 flex flex-col font-sans text-m3-secondary">
         <div id="comic-grid"
             class="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4 p-4 overflow-y-auto w-full max-w-[1800px] mx-auto scroll-smooth no-scrollbar">
             <div class="col-span-full flex flex-col items-center justify-center h-full text-m3-secondary animate-pulse">
                 <span class="text-lg font-bold">Laster inn striper...</span>
             </div>
         </div>
-        <div class="min-h-[100px] bg-m3-surfaceHigh border-t border-[#4A4458] flex items-center justify-between px-8 py-4 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.3)] z-20 relative">
-            <div class="flex-grow flex justify-start w-3/5 pr-4">
-                <p id="dash-quote" class="text-lg md:text-xl text-m3-secondary italic text-left leading-normal whitespace-nowrap truncate border-l-4 border-m3-primary pl-6 py-2">
-                    "Laster inspirasjon..."
-                </p>
+    </div>
+
+    <!-- Global Footer -->
+    <div class="fixed inset-x-0 bottom-0 min-h-[160px] bg-m3-surfaceHigh border-t border-[#4A4458] flex items-center justify-between px-8 py-4 shrink-0 shadow-[0_-5px_20px_rgba(0,0,0,0.3)] z-[80]">
+        <div class="flex-grow flex justify-start w-3/5 pr-4">
+            <p id="dash-quote" class="text-lg md:text-xl text-m3-secondary italic text-left leading-normal whitespace-nowrap truncate border-l-4 border-m3-primary pl-6 py-2">
+                "Laster inspirasjon..."
+            </p>
+        </div>
+        <div class="flex items-center justify-end gap-10 w-2/5 min-w-[350px]">
+            <!-- QR Code -->
+            <div class="flex flex-col items-center gap-1 group relative">
+                <div id="qrcode" class="bg-white p-1 rounded-lg shadow-inner"></div>
+                <span
+                    class="text-m3-secondary text-[10px] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-m3-surface px-2 py-1 rounded shadow-lg border border-[#4A4458] whitespace-nowrap">
+                    Registrer deg
+                </span>
             </div>
-            <div class="flex items-center justify-end gap-5 w-1/5 min-w-[150px]">
+            
+            <!-- Clock -->
+            <div class="flex items-center gap-5">
                 <div id="dash-clock" class="text-5xl font-mono font-bold text-white tracking-tight">00:00</div>
                 <div id="connection-status" class="w-4 h-4 rounded-full bg-m3-error shadow-[0_0_12px_rgba(255,180,171,0.7)] transition-colors duration-500">
                 </div>
