@@ -16,7 +16,7 @@ const db = getFirestore(app);
 const appId = 'holiday-tracker-main';
 
 var currentLunchers = [];
-const lunchCol = collection(db, 'artifacts', appId, 'public', 'lunch');
+const lunchCol = collection(db, 'artifacts', appId, 'public', 'data', 'lunch');
 
 onSnapshot(lunchCol, (snap) => {
     currentLunchers = [];
