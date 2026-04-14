@@ -16,18 +16,23 @@ const db = getFirestore(app);
 const appId = 'holiday-tracker-main';
 
 var currentLunchers = [];
-const lunchCol = collection(db, 'artifacts', appId, 'public', 'data', 'lunch');
-
-onSnapshot(lunchCol, (snap) => {
-    currentLunchers = [];
-    snap.forEach(doc => {
-        const data = doc.data();
-        if (data.active) {
-            currentLunchers.push(data);
-        }
+try {
+    const lunchCol = collection(db, 'artifacts', appId, 'public', 'data', 'lunch');
+    onSnapshot(lunchCol, (snap) => {
+        currentLunchers = [];
+        snap.forEach(doc => {
+            const data = doc.data();
+            if (data.active) {
+                currentLunchers.push(data);
+            }
+        });
+        checkTime();
+    }, (error) => {
+        console.warn("Firestore listener failed, but logic will continue:", error);
     });
-    checkTime();
-});
+} catch (e) {
+    console.warn("Firebase setup failed, but aquarium will still start:", e);
+}
 
 // Variabel for å holde styr på auto-oppdatering
 var simuleringsIntervall = null;
