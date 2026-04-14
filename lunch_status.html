@@ -61,7 +61,7 @@
         }
 
         function startListening() {
-            const col = collection(db, 'artifacts', appId, 'public', 'lunch');
+            const col = collection(db, 'artifacts', appId, 'public', 'data', 'lunch');
             onSnapshot(col, (snap) => {
                 const list = document.getElementById('lunch-list');
                 list.innerHTML = '';
@@ -97,13 +97,13 @@
         }
 
         window.toggleLunch = async function(id, isActive) {
-            const ref = doc(db, 'artifacts', appId, 'public', 'lunch', id);
+            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'lunch', id);
             await updateDoc(ref, { active: isActive });
         }
 
         window.deleteLunch = async function(id) {
             if (!confirm("Vil du slette denne registreringen?")) return;
-            const ref = doc(db, 'artifacts', appId, 'public', 'lunch', id);
+            const ref = doc(db, 'artifacts', appId, 'public', 'data', 'lunch', id);
             await deleteDoc(ref);
         }
 
@@ -120,7 +120,7 @@
             btn.innerText = "Lagrer...";
 
             try {
-                const col = collection(db, 'artifacts', appId, 'public', 'lunch');
+                const col = collection(db, 'artifacts', appId, 'public', 'data', 'lunch');
                 await addDoc(col, {
                     name: name,
                     startTime: start,
