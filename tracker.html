@@ -522,12 +522,18 @@
                         { domain: "tu.no", type: "Lunch" }
                     ];
 
+                    const seenUrls = new Set();
                     sources.forEach(src => {
                         const group = data.comics[src.domain];
                         const list = (group && group[src.type]) ? group[src.type].slice(0, 2) : [];
 
                         list.forEach(imgData => {
                             let url = imgData.url.startsWith('/') ? 'https://ncd.idmedia.no' + imgData.url : imgData.url;
+                            
+                            // Prevent duplicates
+                            if (seenUrls.has(url)) return;
+                            seenUrls.add(url);
+
                             const div = document.createElement('div');
                             div.className = "w-full h-full bg-m3-surface rounded-m3-md shadow-sm border border-[#4A4458] p-3 flex items-center justify-center";
                             div.innerHTML = `<img src="${url}" class="w-full h-full object-contain max-h-full rounded-sm">`;
