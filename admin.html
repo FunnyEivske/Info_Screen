@@ -184,6 +184,67 @@
                     list.innerHTML = '<p class="text-m3-secondary text-center py-10">Ingen aktive skjermer funnet.</p>';
                 }
             });
+
+            // Start Holiday Listener
+            startHolidayListener();
+        }
+
+        function getSeason() {
+            const date = new Date();
+            const month = date.getMonth(); 
+            const day = date.getDate();
+
+            if (month === 11 || (month === 0 && day <= 5)) return 'christmas';
+            if (month === 1 && day >= 15 && day <= 28) return 'winter';
+            if (month === 2 || (month === 3 && day <= 22)) return 'spring';
+            if ((month === 5 && day >= 20) || month === 6 || (month === 7 && day <= 18)) return 'summer';
+            if ((month === 8 && day >= 28) || (month === 9 && day <= 10)) return 'autumn';
+
+            return 'spring'; 
+        }
+
+        function startHolidayListener() {
+            const season = getSeason();
+            const col = collection(db, 'artifacts', appId, 'public', 'data', season);
+
+            onSnapshot(col, (snap) => {
+                const list = document.getElementById('holiday-list');
+                list.innerHTML = '';
+                
+                snap.forEach(d => {
+                    const item = d.data();
+                    const id = d.id;
+                    const card = document.createElement('div');
+                    card.className = "bg-m3-surfaceHigh p-4 rounded-m3-md border border-[#4A4458] flex justify-between items-center";
+                    card.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <span class="text-2xl">${item.emoji || '🏝️'}</span>
+                            <div>
+                                <div class="text-white font-bold">${item.name}</div>
+                                <div class="text-xs text-m3-secondary">${item.startDate} - ${item.endDate}</div>
+                            </div>
+                        </div>
+                        <button onclick="deleteHoliday('${season}', '${id}')" class="text-m3-error hover:bg-m3-error/10 p-2 rounded-full transition" title="Slett registering">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    `;
+                    list.appendChild(card);
+                });
+
+                if (snap.empty) {
+                    list.innerHTML = '<p class="text-m3-secondary text-center py-4 bg-m3-surface rounded-m3-md">Ingen registrerte ferier denne sesongen.</p>';
+                }
+            });
+        }
+
+        window.deleteHoliday = async function(season, id) {
+            if (!confirm("Er du sikker på at du vil slette denne ferieregistreringen?")) return;
+            try {
+                const ref = doc(db, 'artifacts', appId, 'public', 'data', season, id);
+                await deleteDoc(ref);
+            } catch (e) {
+                alert("Kunne ikke slette: " + e.message);
+            }
         }
 
         window.sendCommand = async function (sessionId, cmd) {
@@ -374,6 +435,23 @@
         <div id="session-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <!-- Sessions go here -->
             <div class="col-span-full text-center text-m3-secondary animate-pulse font-medium py-12 bg-m3-surfaceHigh rounded-m3">Laster inn skjermer...</div>
+        </div>
+
+        <!-- HOLIDAY MANAGEMENT -->
+        <div class="mt-12 pt-8 border-t border-[#4A4458]">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-full bg-m3-primaryContainer flex items-center justify-center text-xl">
+                    🏝️
+                </div>
+                <h2 class="text-2xl font-bold text-white">Administrer Ferier</h2>
+            </div>
+            
+            <div id="holiday-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Holidays go here -->
+                <div class="col-span-full text-center text-m3-secondary py-8 bg-m3-surface rounded-m3-md animate-pulse">
+                    Henter ferieliste...
+                </div>
+            </div>
         </div>
     </div>
 

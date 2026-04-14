@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="no">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunch Status</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        m3: {
+                            bg: '#141218',
+                            surface: '#211F26', 
+                            surfaceHigh: '#2B2930', 
+                            primary: '#D0BCFF',
+                            onPrimary: '#381E72',
+                            primaryContainer: '#4F378B',
+                            onPrimaryContainer: '#EADDFF',
+                            secondary: '#CCC2DC',
+                            onSecondary: '#332D41',
+                            error: '#F2B8B5',
+                            onError: '#8C1D18'
+                        }
+                    },
+                    fontFamily: { sans: ['Roboto', 'sans-serif'], },
+                    borderRadius: { 'm3': '28px', 'm3-md': '16px' }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, addDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCOcFfiRIw3sgU9eqEbwc1uc_Ur1aTOJXk",
+            authDomain: "ferie-805e0.firebaseapp.com",
+            projectId: "ferie-805e0",
+            storageBucket: "ferie-805e0.firebasestorage.app",
+            messagingSenderId: "621338557882",
+            appId: "1:621338557882:web:9eae6887a484db316d7183",
+            measurementId: "G-C8PT9DKJ3Q"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'holiday-tracker-main';
+
+        async function init() {
+            await signInAnonymously(auth);
+            startListening();
+        }
+
+        function startListening() {
+            const col = collection(db, 'artifacts', appId, 'public', 'lunch');
+            onSnapshot(col, (snap) => {
+                const list = document.getElementById('lunch-list');
+                list.innerHTML = '';
+                
+                snap.forEach(d => {
+                    const item = d.data();
+                    const id = d.id;
+                    const card = document.createElement('div');
+                    card.className = `p-5 rounded-m3-md border transition-all ${item.active ? 'bg-m3-surfaceHigh border-m3-primary shadow-lg' : 'bg-m3-surface border-[#4A4458] opacity-60'}`;
+                    
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-white font-bold text-lg">${item.name}</h3>
+                                <p class="text-sm text-m3-secondary">${item.startTime} - ${item.endTime}</p>
+                            </div>
+                            <div class="flex flex-col items-end gap-2">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" ${item.active ? 'checked' : ''} class="sr-only peer" onchange="toggleLunch('${id}', this.checked)">
+                                    <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-m3-primary"></div>
+                                </label>
+                                <button onclick="deleteLunch('${id}')" class="text-xs text-m3-error hover:underline mt-2">Slett</button>
+                            </div>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+
+                if (snap.empty) {
+                    list.innerHTML = '<div class="col-span-full text-center py-12 text-m3-secondary italic">Ingen registrerte ennå. Legg til deg selv under!</div>';
+                }
+            });
+        }
+
+        window.toggleLunch = async function(id, isActive) {
+            const ref = doc(db, 'artifacts', appId, 'public', 'lunch', id);
+            await updateDoc(ref, { active: isActive });
+        }
+
+        window.deleteLunch = async function(id) {
+            if (!confirm("Vil du slette denne registreringen?")) return;
+            const ref = doc(db, 'artifacts', appId, 'public', 'lunch', id);
+            await deleteDoc(ref);
+        }
+
+        window.submitLunch = async function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const start = document.getElementById('start').value;
+            const end = document.getElementById('end').value;
+            
+            if (!name || !start || !end) return;
+            
+            const btn = document.getElementById('add-btn');
+            btn.disabled = true;
+            btn.innerText = "Lagrer...";
+
+            try {
+                const col = collection(db, 'artifacts', appId, 'public', 'lunch');
+                await addDoc(col, {
+                    name: name,
+                    startTime: start,
+                    endTime: end,
+                    active: true,
+                    createdAt: serverTimestamp()
+                });
+                document.getElementById('lunch-form').reset();
+            } catch (err) {
+                alert("Feil: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Legg til Lunsj";
+            }
+        }
+
+        init();
+    </script>
+    <style>
+        body { background-color: #141218; color: #E6E0E9; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+
+<body class="min-h-screen p-6">
+    <div class="max-w-4xl mx-auto">
+        <header class="flex items-center justify-between mb-8 pb-4 border-b border-[#4A4458]">
+            <div class="flex items-center gap-4">
+                <a href="index.html" class="w-12 h-12 rounded-full bg-m3-surfaceHigh hover:bg-m3-surface flex items-center justify-center transition-colors shadow-sm">
+                    <i class="fa-solid fa-arrow-left text-m3-secondary hover:text-white"></i>
+                </a>
+                <div>
+                    <h1 class="text-3xl font-bold text-white">Lunsj Status</h1>
+                    <div class="text-sm text-m3-primary font-medium tracking-wide">Administrer hvem som er på lunsj</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ADD LUNCH FORM -->
+        <div class="bg-m3-surfaceHigh p-8 rounded-m3 shadow-xl mb-12 border border-[#4A4458]">
+            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-m3-primary"></i> Registrer Ny Lunsj
+            </h2>
+            <form id="lunch-form" onsubmit="submitLunch(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold text-m3-secondary mb-1">Navn</label>
+                    <input type="text" id="name" required placeholder="F.eks. Ola Nordmann" class="w-full bg-m3-surface border-b-2 border-[#4A4458] focus:border-m3-primary p-3 text-white outline-none rounded-t-md transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-m3-secondary mb-1">Fra (kl)</label>
+                    <input type="time" id="start" required class="w-full bg-m3-surface border-b-2 border-[#4A4458] focus:border-m3-primary p-3 text-white outline-none rounded-t-md transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-m3-secondary mb-1">Til (kl)</label>
+                    <input type="time" id="end" required class="w-full bg-m3-surface border-b-2 border-[#4A4458] focus:border-m3-primary p-3 text-white outline-none rounded-t-md transition-all">
+                </div>
+                <button type="submit" id="add-btn" class="md:col-span-4 bg-m3-primary text-m3-onPrimary font-bold py-3 rounded-full hover:opacity-90 shadow-md transition-all mt-4">
+                    Legg til Lunsj
+                </button>
+            </form>
+        </div>
+
+        <!-- LUNCH LIST -->
+        <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-m3-primary"></i> Registrerte Personer
+        </h2>
+        <div id="lunch-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full text-center py-12 text-m3-secondary animate-pulse">Henter lunsjliste...</div>
+        </div>
+    </div>
+</body>
+</html>

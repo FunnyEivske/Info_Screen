@@ -1,24 +1,36 @@
-/* --- Skript for lunch.html --- */
-/* ENDRET: Bruker 'var' for eldre kompatibilitet */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-// --- NY VAKTPLAN REMOVED (Aquarium only) ---
-
-// --- GAMMEL LUNSJPLAN ---
-var lunchSchedule = {
-    1: { "10:30": "Mariann", "11:00": "Mathilde, Jonny, Olai", "11:30": "AC, Audun" },
-    2: { "10:30": "Mariann", "11:00": "Jonny, Audun", "11:30": "AC, Mathilde, Olai" },
-    3: { "10:30": "Mariann", "11:00": "AC, Mathilde, Audun", "11:30": "Jonny, Olai" },
-    4: { "10:30": "Mariann", "11:00": "Jonny, Olai", "11:30": "AC, Audun, Mathilde" },
-    5: { "10:30": "Mariann", "11:00": "Mathilde, Jonny, Audun", "11:30": "AC, Olai" },
-    0: { "10:30": "-", "11:00": "-", "11:30": "-" },
-    6: { "10:30": "-", "11:00": "-", "11:30": "-" }
+const firebaseConfig = {
+    apiKey: "AIzaSyCOcFfiRIw3sgU9eqEbwc1uc_Ur1aTOJXk",
+    authDomain: "ferie-805e0.firebaseapp.com",
+    projectId: "ferie-805e0",
+    storageBucket: "ferie-805e0.firebasestorage.app",
+    messagingSenderId: "621338557882",
+    appId: "1:621338557882:web:9eae6887a484db316d7183",
+    measurementId: "G-C8PT9DKJ3Q"
 };
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const appId = 'holiday-tracker-main';
+
+var currentLunchers = [];
+const lunchCol = collection(db, 'artifacts', appId, 'public', 'lunch');
+
+onSnapshot(lunchCol, (snap) => {
+    currentLunchers = [];
+    snap.forEach(doc => {
+        const data = doc.data();
+        if (data.active) {
+            currentLunchers.push(data);
+        }
+    });
+    checkTime();
+});
 
 // Variabel for å holde styr på auto-oppdatering
 var simuleringsIntervall = null;
-
-// --- oppdaterVaktNavn removed ---
-
 
 /**
  * Hovedfunksjon som sjekker tiden og oppdaterer skjermen.
@@ -27,33 +39,25 @@ function checkTime() {
     var now = new Date(); // Dato-objekt (lokal tid for klienten)
 
     // --- START: PÅLITELIG TIDSSONE-LOGIKK (ES5-stil) ---
-
-    // 1. Hent klokkeslett-streng (HH:mm) fra "Europe/Oslo"
     var osloTimeStr = new Intl.DateTimeFormat('nb-NO', {
         timeZone: 'Europe/Oslo',
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
-    }).format(now); // F.eks. "11:15" eller "08:05"
-
-    // 2. Hent ukedag-streng (navn) fra "Europe/Oslo"
-    // (Vi bruker en-US for å få et standardisert navn vi kan slå opp)
-    var osloDayStr = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Europe/Oslo',
-        weekday: 'long' // F.eks. "Wednesday"
     }).format(now);
 
-    // 3. Konverter strengene til tall for logikken
-    var hour = parseInt(osloTimeStr.substring(0, 2), 10); // F.eks. 11
-    var minute = parseInt(osloTimeStr.substring(3, 5), 10); // F.eks. 15
-    var timeString = osloTimeStr; // "11:15"
+    var osloDayStr = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Europe/Oslo',
+        weekday: 'long'
+    }).format(now);
 
-    // 4. Konverter ukedag-navn til tall (0=Søndag, 1=Mandag, ...)
+    var hour = parseInt(osloTimeStr.substring(0, 2), 10);
+    var minute = parseInt(osloTimeStr.substring(3, 5), 10);
+    var timeString = osloTimeStr;
+
     var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    var dayOfWeek = days.indexOf(osloDayStr); // F.eks. 3 for "Wednesday"
-
+    var dayOfWeek = days.indexOf(osloDayStr);
     // --- SLUTT: PÅLITELIG TIDSSONE-LOGIKK ---
-
 
     // Hent klokke-elementet og oppdater det
     var klokkeEl = document.getElementById('vakt-klokke');
@@ -61,37 +65,41 @@ function checkTime() {
         klokkeEl.innerHTML = timeString;
     }
 
-    // Hent resten av DOM-elementene
     var messageOverlay = document.getElementById('message-overlay');
     var messageText = document.getElementById('message-text');
     var afterHoursScreen = document.getElementById('after-hours');
     var backgroundElement = document.getElementById('aquarium-canvas');
-    // var vaktBar removed 
 
-    var todaySchedule = lunchSchedule[dayOfWeek] || lunchSchedule[0];
     var message = "";
 
-    // --- Logikk for LUNSJ-meldinger ---
+    // --- Dynamisk lunsj-logikk fra Firestore ---
+    var lunchNow = [];
+    var lunchSoon = [];
+    var nowMins = hour * 60 + minute;
+
+    currentLunchers.forEach(function(l) {
+        if (!l.startTime || !l.endTime) return;
+        var sParts = l.startTime.split(':');
+        var eParts = l.endTime.split(':');
+        var startMins = parseInt(sParts[0]) * 60 + parseInt(sParts[1]);
+        var endMins = parseInt(eParts[0]) * 60 + parseInt(eParts[1]);
+
+        if (nowMins >= startMins && nowMins < endMins) {
+            lunchNow.push(l.name);
+        } else if (nowMins >= startMins - 15 && nowMins < startMins) {
+            lunchSoon.push({ name: l.name, time: l.startTime });
+        }
+    });
+
+    if (lunchNow.length > 0) {
+        message = 'Det er lunsj!<br><small style="font-size: 0.6em">' + lunchNow.join(', ') + '</small>';
+    } else if (lunchSoon.length > 0) {
+        message = 'Lunsj nærmer seg!<br><small style="font-size: 0.6em">' + lunchSoon.map(s => s.name + " (" + s.time + ")").join(', ') + '</small>';
+    }
+    
+    // Spesial-meldinger
     if (hour === 8 && minute >= 0 && minute < 5) {
         message = "Velkommen tilbake!";
-    }
-    else if (hour === 11 && minute >= 15 && minute < 30) {
-        message = 'Lunsj nærmer seg! (11:30)<br><small style="font-size: 0.6em">' + todaySchedule['11:30'] + '</small>';
-    }
-    else if (hour === 11 && minute >= 30) {
-        message = 'Det er lunsj! (11:30)<br><small style="font-size: 0.6em">' + todaySchedule['11:30'] + '</small>';
-    }
-    else if (hour === 10 && minute >= 45) {
-        message = 'Lunsj nærmer seg! (11:00)<br><small style="font-size: 0.6em">' + todaySchedule['11:00'] + '</small>';
-    }
-    else if (hour === 11 && minute < 15) { // 11:00 - 11:14
-        message = 'Det er lunsj! (11:00)<br><small style="font-size: 0.6em">' + todaySchedule['11:00'] + '</small>';
-    }
-    else if (hour === 10 && minute >= 15 && minute < 30) {
-        message = 'Lunsj nærmer seg! (10:30)<br><small style="font-size: 0.6em">' + todaySchedule['10:30'] + '</small>';
-    }
-    else if (hour === 10 && minute >= 30 && minute < 45) { // 10:30 - 10:44
-        message = 'Det er lunsj! (10:30)<br><small style="font-size: 0.6em">' + todaySchedule['10:30'] + '</small>';
     }
     else if (hour === 15 && minute >= 30) {
         message = "På tide å dra hjem!";
@@ -102,12 +110,12 @@ function checkTime() {
         afterHoursScreen.style.display = 'flex';
         if (backgroundElement) backgroundElement.style.opacity = '0';
         messageOverlay.classList.remove('visible');
-        if (klokkeEl) klokkeEl.style.display = 'none'; // Skjul klokke
+        if (klokkeEl) klokkeEl.style.display = 'none';
     }
     else { // I åpningstiden
         afterHoursScreen.style.display = 'none';
         if (backgroundElement) backgroundElement.style.opacity = '1';
-        if (klokkeEl) klokkeEl.style.display = 'block'; // Vis klokke
+        if (klokkeEl) klokkeEl.style.display = 'block';
 
         if (message) {
             messageText.innerHTML = message;

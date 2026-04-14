@@ -483,14 +483,23 @@
                 };
             },
 
-            updateStatus: function (ok) {
-                const el = document.getElementById('connection-status');
-                if (el) {
-                    el.className = `w-4 h-4 rounded-full transition-colors duration-500 shadow-md ${ok ? 'bg-[#93D78C] shadow-[#93D78C]/50' : 'bg-m3-error shadow-m3-error/50'}`;
+            getImageHash: async function(url) {
+                try {
+                    // Try to fetch image data for hashing. Requires CORS on the server.
+                    const response = await fetch(url, { mode: 'cors' });
+                    if (!response.ok) return null;
+                    const blob = await response.blob();
+                    const arrayBuffer = await blob.arrayBuffer();
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                } catch (e) {
+                    // Fallback to null if CORS or fetch fails
+                    return null;
                 }
             },
 
-            updateContent: function (data) {
+            updateContent: async function (data) {
                 // Quotes
                 if (data.quotes && data.quotes.sadserver) {
                     const raw = data.quotes.sadserver;
@@ -515,30 +524,57 @@
                 // Comics
                 if (data.comics) {
                     const grid = document.getElementById('comic-grid');
-                    grid.innerHTML = '';
                     const sources = [
                         { domain: "vg.no", type: "Lunch" },
                         { domain: "vg.no", type: "Pappa" },
                         { domain: "tu.no", type: "Lunch" }
                     ];
 
-                    const seenUrls = new Set();
+                    // Gather more candidates from each source (up to 4) to ensure unique items
+                    const candidates = [];
                     sources.forEach(src => {
                         const group = data.comics[src.domain];
-                        const list = (group && group[src.type]) ? group[src.type].slice(0, 2) : [];
-
-                        list.forEach(imgData => {
-                            let url = imgData.url.startsWith('/') ? 'https://ncd.idmedia.no' + imgData.url : imgData.url;
-                            
-                            // Prevent duplicates
-                            if (seenUrls.has(url)) return;
-                            seenUrls.add(url);
-
-                            const div = document.createElement('div');
-                            div.className = "w-full h-full bg-m3-surface rounded-m3-md shadow-sm border border-[#4A4458] p-3 flex items-center justify-center";
-                            div.innerHTML = `<img src="${url}" class="w-full h-full object-contain max-h-full rounded-sm">`;
-                            grid.appendChild(div);
+                        const list = (group && group[src.type]) ? group[src.type].slice(0, 4) : [];
+                        list.forEach(item => {
+                            candidates.push({
+                                ...item,
+                                fullUrl: item.url.startsWith('/') ? 'https://ncd.idmedia.no' + item.url : item.url
+                            });
                         });
+                    });
+
+                    // Fetch hashes for all candidates in parallel
+                    const hashes = await Promise.all(candidates.map(c => this.getImageHash(c.fullUrl)));
+
+                    const seenHashes = new Set();
+                    const seenUrls = new Set();
+                    const finalItems = [];
+
+                    for (let i = 0; i < candidates.length; i++) {
+                        if (finalItems.length >= 6) break;
+                        const item = candidates[i];
+                        const hash = hashes[i];
+
+                        // Skip if URL already seen (fast check)
+                        if (seenUrls.has(item.fullUrl)) continue;
+                        seenUrls.add(item.fullUrl);
+
+                        // Skip if hash already seen (content check)
+                        if (hash) {
+                            if (seenHashes.has(hash)) continue;
+                            seenHashes.add(hash);
+                        }
+                        
+                        finalItems.push(item);
+                    }
+
+                    // Render unique items
+                    grid.innerHTML = '';
+                    finalItems.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = "w-full h-full bg-m3-surface rounded-m3-md shadow-sm border border-[#4A4458] p-3 flex items-center justify-center";
+                        div.innerHTML = `<img src="${item.fullUrl}" class="w-full h-full object-contain max-h-full rounded-sm">`;
+                        grid.appendChild(div);
                     });
                 }
             }
