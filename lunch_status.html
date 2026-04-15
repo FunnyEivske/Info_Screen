@@ -73,13 +73,27 @@
                     const card = document.createElement('div');
                     card.className = `p-5 rounded-m3-md border transition-all ${item.active ? 'bg-m3-surfaceHigh border-m3-primary shadow-lg' : 'bg-m3-surface border-[#4A4458] opacity-60'}`;
                     
+                    let timeDisplay = "";
+                    if (item.schedule) {
+                        timeDisplay = `<div class="text-[10px] text-m3-secondary space-y-1 mt-1">`;
+                        const dNames = { 1:'Man', 2:'Tir', 3:'Ons', 4:'Tor', 5:'Fre' };
+                        for(let i=1; i<=5; i++) {
+                            if(item.schedule[i]) {
+                                timeDisplay += `<div><span class="font-bold inline-block w-8">${dNames[i]}:</span>${item.schedule[i].start} - ${item.schedule[i].end}</div>`;
+                            }
+                        }
+                        timeDisplay += `</div>`;
+                    } else if (item.startTime && item.endTime) {
+                        timeDisplay = `<p class="text-sm text-m3-secondary">${item.startTime} - ${item.endTime} (Eldre format)</p>`;
+                    }
+
                     card.innerHTML = `
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <h3 class="text-white font-bold text-lg">${item.name}</h3>
-                                <p class="text-sm text-m3-secondary">${item.startTime} - ${item.endTime}</p>
+                                ${timeDisplay}
                             </div>
-                            <div class="flex flex-col items-end gap-2">
+                            <div class="flex flex-col items-end gap-2 shrink-0 ml-4">
                                 <label class="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" ${item.active ? 'checked' : ''} class="sr-only peer" onchange="toggleLunch('${id}', this.checked)">
                                     <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-m3-primary"></div>
@@ -108,13 +122,35 @@
             await deleteDoc(ref);
         }
 
+        window.copyMondayTime = function(type) {
+            const val = document.getElementById(type + '-1').value;
+            for(let i=2; i<=5; i++) {
+                const el = document.getElementById(type + '-' + i);
+                if(el && !el.value && val) {
+                    el.value = val;
+                }
+            }
+        }
+
         window.submitLunch = async function(e) {
             e.preventDefault();
             const name = document.getElementById('name').value;
-            const start = document.getElementById('start').value;
-            const end = document.getElementById('end').value;
             
-            if (!name || !start || !end) return;
+            if (!name) return;
+
+            let schedule = {};
+            for(let i=1; i<=5; i++) {
+                const s = document.getElementById('start-'+i).value;
+                const eTime = document.getElementById('end-'+i).value;
+                if(s && eTime) {
+                    schedule[i] = { start: s, end: eTime };
+                }
+            }
+
+            if (Object.keys(schedule).length === 0) {
+                alert("Du må fylle ut lunsjtid for minst én dag.");
+                return;
+            }
             
             const btn = document.getElementById('add-btn');
             btn.disabled = true;
@@ -124,8 +160,7 @@
                 const col = collection(db, 'artifacts', appId, 'public', 'data', 'lunch');
                 await addDoc(col, {
                     name: name,
-                    startTime: start,
-                    endTime: end,
+                    schedule: schedule,
                     active: true,
                     createdAt: serverTimestamp()
                 });
@@ -165,20 +200,49 @@
             <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
                 <i class="fa-solid fa-user-plus text-m3-primary"></i> Registrer Ny Lunsj
             </h2>
-            <form id="lunch-form" onsubmit="submitLunch(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                <div class="md:col-span-2">
+            <form id="lunch-form" onsubmit="submitLunch(event)" class="space-y-4">
+                <div>
                     <label class="block text-xs font-bold text-m3-secondary mb-1">Navn</label>
                     <input type="text" id="name" required placeholder="F.eks. Ola Nordmann" class="w-full bg-m3-surface border-b-2 border-[#4A4458] focus:border-m3-primary p-3 text-white outline-none rounded-t-md transition-all">
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-m3-secondary mb-1">Fra (kl)</label>
-                    <input type="time" id="start" required class="w-full bg-m3-surface border-b-2 border-[#4A4458] focus:border-m3-primary p-3 text-white outline-none rounded-t-md transition-all">
+                
+                <div class="space-y-2 mt-4">
+                    <label class="block text-xs font-bold text-m3-secondary">Tider (man-fre)</label>
+                    <p class="text-[10px] text-m3-secondary mb-2">💡 Tips: Fyll ut mandag for å kopiere til resten av uken automatisk.</p>
+                    
+                    <!-- Mandag -->
+                    <div class="grid grid-cols-5 gap-2 items-center bg-m3-surface p-2 rounded-md">
+                        <span class="col-span-1 text-sm font-bold text-m3-secondary pl-2">Man</span>
+                        <input type="time" id="start-1" onchange="copyMondayTime('start')" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                        <input type="time" id="end-1" onchange="copyMondayTime('end')" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                    </div>
+                    <!-- Tirsdag -->
+                    <div class="grid grid-cols-5 gap-2 items-center bg-m3-surface p-2 rounded-md">
+                        <span class="col-span-1 text-sm font-bold text-m3-secondary pl-2">Tir</span>
+                        <input type="time" id="start-2" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                        <input type="time" id="end-2" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                    </div>
+                    <!-- Onsdag -->
+                    <div class="grid grid-cols-5 gap-2 items-center bg-m3-surface p-2 rounded-md">
+                        <span class="col-span-1 text-sm font-bold text-m3-secondary pl-2">Ons</span>
+                        <input type="time" id="start-3" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                        <input type="time" id="end-3" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                    </div>
+                    <!-- Torsdag -->
+                    <div class="grid grid-cols-5 gap-2 items-center bg-m3-surface p-2 rounded-md">
+                        <span class="col-span-1 text-sm font-bold text-m3-secondary pl-2">Tor</span>
+                        <input type="time" id="start-4" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                        <input type="time" id="end-4" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                    </div>
+                    <!-- Fredag -->
+                    <div class="grid grid-cols-5 gap-2 items-center bg-m3-surface p-2 rounded-md">
+                        <span class="col-span-1 text-sm font-bold text-m3-secondary pl-2">Fre</span>
+                        <input type="time" id="start-5" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                        <input type="time" id="end-5" required class="col-span-2 bg-m3-bg border-b border-[#4A4458] focus:border-m3-primary p-2 text-white outline-none rounded-t-sm transition-all text-sm">
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-m3-secondary mb-1">Til (kl)</label>
-                    <input type="time" id="end" required class="w-full bg-m3-surface border-b-2 border-[#4A4458] focus:border-m3-primary p-3 text-white outline-none rounded-t-md transition-all">
-                </div>
-                <button type="submit" id="add-btn" class="md:col-span-4 bg-m3-primary text-m3-onPrimary font-bold py-3 rounded-full hover:opacity-90 shadow-md transition-all mt-4">
+
+                <button type="submit" id="add-btn" class="w-full bg-m3-primary text-m3-onPrimary font-bold py-3 rounded-full hover:opacity-90 shadow-md transition-all mt-6">
                     Legg til Lunsj
                 </button>
             </form>

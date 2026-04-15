@@ -82,19 +82,36 @@ function checkTime() {
     var lunchSoon = [];
     var nowMins = hour * 60 + minute;
 
-    currentLunchers.forEach(function(l) {
-        if (!l.startTime || !l.endTime) return;
-        var sParts = l.startTime.split(':');
-        var eParts = l.endTime.split(':');
-        var startMins = parseInt(sParts[0]) * 60 + parseInt(sParts[1]);
-        var endMins = parseInt(eParts[0]) * 60 + parseInt(eParts[1]);
+    // Ikke vis lunsj i helgene (0=Søndag, 6=Lørdag)
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        currentLunchers.forEach(function(l) {
+            var activeStart, activeEnd;
+            
+            // Sjekk nytt format (per ukedag)
+            if (l.schedule && l.schedule[dayOfWeek]) {
+                activeStart = l.schedule[dayOfWeek].start;
+                activeEnd = l.schedule[dayOfWeek].end;
+            } 
+            // Fallback til eldre registreringer
+            else if (l.startTime && l.endTime) {
+                activeStart = l.startTime;
+                activeEnd = l.endTime;
+            }
 
-        if (nowMins >= startMins && nowMins < endMins) {
-            lunchNow.push(l.name);
-        } else if (nowMins >= startMins - 15 && nowMins < startMins) {
-            lunchSoon.push({ name: l.name, time: l.startTime });
-        }
-    });
+            if (!activeStart || !activeEnd) return;
+
+            var sParts = activeStart.split(':');
+            var eParts = activeEnd.split(':');
+            var startMins = parseInt(sParts[0], 10) * 60 + parseInt(sParts[1], 10);
+            var endMins = parseInt(eParts[0], 10) * 60 + parseInt(eParts[1], 10);
+
+            if (nowMins >= startMins && nowMins < endMins) {
+                lunchNow.push(l.name);
+            } else if (nowMins >= startMins - 15 && nowMins < startMins) {
+                lunchSoon.push({ name: l.name, time: activeStart });
+            }
+        });
+    }
 
     if (lunchNow.length > 0) {
         message = 'Det er lunsj!<br><small style="font-size: 0.6em">' + lunchNow.join(', ') + '</small>';
