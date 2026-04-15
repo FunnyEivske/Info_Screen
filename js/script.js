@@ -21,19 +21,17 @@ var LOCATIONS = [
     { id: 'grimstad', name: 'Grimstad', latitude: 58.33455833890616, longitude: 8.577132411967785 },
     { id: 'kristiansand', name: 'Kristiansand', latitude: 58.16329955371125, longitude: 8.00258786985478 },
     { id: 'arendal', name: 'Arendal', latitude: 58.46086657739493, longitude: 8.764345505384163 },
-    { id: 'hovag', name: 'Høvåg', latitude: 58.522017, longitude: 8.351285 }
+    { id: 'hovag', name: 'Høvåg', latitude: 58.522017, longitude: 8.351285 },
+    { id: 'ravenna', name: 'Ravenna', latitude: 44.4178, longitude: 12.1979 }
 ];
 var NRK_RSS_URL = 'https://www.nrk.no/nyheter/siste.rss';
 var VG_RSS_URL = 'https://www.vg.no/rss/feed/?categories=1068&keywords=&limit=10&format=rss';
 var ENTUR_GRAPHQL_URL = 'https://api.entur.io/journey-planner/v3/graphql';
-var CORS_PROXY_PREFIX = 'https://corsproxy.io/?';
 
-// Bus Stops (NSR Quays) - Separated by Direction
-// Vest (Kristiansand): 38117 (Line 100), 38108 (Local M2), 38111 (Line 36 Tveit)
-// Øst (Arendal): 38116 (Line 101)
+// Bus Stops (NSR Quays) - Corrected for Universitetet (Grimstad)
 var BUS_STOPS = [
-    { ids: ['NSR:Quay:38117', 'NSR:Quay:38108', 'NSR:Quay:38111'], elementId: 'bus-departures-1' }, // Mot Kristiansand
-    { ids: ['NSR:Quay:38116'], elementId: 'bus-departures-2' }  // Mot Arendal
+    { ids: ['NSR:Quay:38117', 'NSR:Quay:40507'], elementId: 'bus-departures-1' }, // Mot Kristiansand (Grimstad platforms)
+    { ids: ['NSR:Quay:38116', 'NSR:Quay:40506'], elementId: 'bus-departures-2' }  // Mot Arendal (Grimstad platforms)
 ];
 
 // --- Global cache for news ---
@@ -142,10 +140,9 @@ function updateWeather() {
 
     LOCATIONS.forEach(function (loc, index) {
         var url = 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=' + loc.latitude + '&lon=' + loc.longitude;
-        var proxyUrl = CORS_PROXY_PREFIX + encodeURIComponent(url);
 
         var xhr = new XMLHttpRequest();
-        xhr.open('GET', proxyUrl, true);
+        xhr.open('GET', url, true);
 
         xhr.onload = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -200,8 +197,8 @@ function updateWeather() {
 }
 
 function fetchNews() {
-    logStatus('⏳ Henter NRK-nyheter (RSS)...');
-    var proxyUrl = CORS_PROXY_PREFIX + encodeURIComponent(NRK_RSS_URL);
+    logStatus('⏳ Henter NRK-nyheter...');
+    var proxyUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(NRK_RSS_URL);
     var headlineEl = document.getElementById('nrk-headline');
 
     var xhr = new XMLHttpRequest();
@@ -210,18 +207,15 @@ function fetchNews() {
     xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
             try {
-                var xmlText = xhr.responseText;
-                var parser = new DOMParser();
-                var xmlDoc = parser.parseFromString(xmlText, "text/xml");
-                var items = xmlDoc.querySelectorAll("item");
-
-                if (items.length === 0) throw new Error('Ingen nyheter');
+                var data = JSON.parse(xhr.responseText);
+                if (data.status !== 'ok' || !data.items || data.items.length === 0) {
+                    throw new Error('Ingen nyheter');
+                }
 
                 var headlines = [];
-                items.forEach(function (item) {
-                    var titleEl = item.querySelector("title");
-                    if (titleEl) {
-                        headlines.push(titleEl.textContent.replace("<![CDATA[", "").replace("]]>", "").trim());
+                data.items.forEach(function (item) {
+                    if (item.title) {
+                        headlines.push(item.title.trim());
                     }
                 });
 
@@ -234,7 +228,10 @@ function fetchNews() {
 
             } catch (e) {
                 logStatus('❌ Nyheter feilet: ' + e.message);
+                if (headlineEl) headlineEl.textContent = "Kunne ikke laste NRK nyheter";
             }
+        } else {
+             if (headlineEl) headlineEl.textContent = "Nettverksfeil for NRK";
         }
     };
     xhr.send();
@@ -258,8 +255,9 @@ function rotateNews(reset) {
 }
 
 function fetchVGNews() {
-    logStatus('⏳ Henter VG-nyheter (RSS)...');
-    var proxyUrl = CORS_PROXY_PREFIX + encodeURIComponent(VG_RSS_URL);
+    logStatus('⏳ Henter VG-nyheter...');
+    var proxyUrl = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(VG_RSS_URL);
+    var headlineEl = document.getElementById('vg-headline');
 
     var xhr = new XMLHttpRequest();
     xhr.open('GET', proxyUrl, true);
@@ -267,16 +265,15 @@ function fetchVGNews() {
     xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
             try {
-                var xmlText = xhr.responseText;
-                var parser = new DOMParser();
-                var xmlDoc = parser.parseFromString(xmlText, "text/xml");
-                var items = xmlDoc.querySelectorAll("item");
+                var data = JSON.parse(xhr.responseText);
+                if (data.status !== 'ok' || !data.items || data.items.length === 0) {
+                    throw new Error('Ingen nyheter');
+                }
 
                 var headlines = [];
-                items.forEach(function (item) {
-                    var titleEl = item.querySelector("title");
-                    if (titleEl) {
-                        headlines.push(titleEl.textContent.replace("<![CDATA[", "").replace("]]>", "").trim());
+                data.items.forEach(function (item) {
+                    if (item.title) {
+                        headlines.push(item.title.trim());
                     }
                 });
 
@@ -288,7 +285,10 @@ function fetchVGNews() {
                 }
             } catch (e) {
                 logStatus('❌ VG feilet: ' + e.message);
+                if (headlineEl) headlineEl.textContent = "Kunne ikke laste VG nyheter";
             }
+        } else {
+             if (headlineEl) headlineEl.textContent = "Nettverksfeil for VG";
         }
     };
     xhr.send();

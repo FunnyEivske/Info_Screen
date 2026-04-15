@@ -160,13 +160,14 @@ body {
 .bus-line {
     background-color: #D0BCFF; color: #381E72;
     font-weight: 700; padding: 0.25rem 0.75rem; border-radius: 12px;
-    margin-right: 1rem; min-width: 3.5rem; text-align: center;
+    margin-right: 1rem; min-width: 4rem; text-align: center;
+    font-size: 1.5rem;
 }
 .bus-dest {
-    flex-grow: 1; font-size: 1.125rem; font-weight: 500;
+    flex-grow: 1; font-size: 1.375rem; font-weight: 500;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 0.5rem;
 }
-.bus-time { font-weight: 700; color: #EADDFF; font-size: 1.25rem; white-space: nowrap; }
+.bus-time { font-weight: 700; color: #EADDFF; font-size: 1.5rem; white-space: nowrap; }
 .bus-time.realtime { color: #A8C7FA; }
 
 #clock-main {
